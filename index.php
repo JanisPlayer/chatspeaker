@@ -31,11 +31,18 @@ function getUserID(string $auth_token)  {
   $data = json_decode($response, true);
 
   if(isset($data['data'][0]['id'])) {
-      return $data['data'][0]['id'];
+    if ((int)$data['data'][0]['id'] != null && (int)$data['data'][0]['id'] != 0 && is_numeric((int)$data['data'][0]['id']) != false) { //UserID darf nicht 0 oder leer oder keine Zahl sein.
+      return (int)$data['data'][0]['id'];
+    } else {
+            die('Error: Failed to retrieve user ID.');
+    }
   } else {
-      echo 'Error: Failed to retrieve user ID.';
+      die('Error: Failed to retrieve user ID.');
   }
 }
+
+session_set_cookie_params(86400); //Session Dauer 1 Tag
+session_cache_expire(144);
 
 session_start();
 
