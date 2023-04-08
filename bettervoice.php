@@ -63,6 +63,7 @@ function send_request_via_proxy($proxy_host, $proxy_port, $url) {
 
 function check_access_limit($text, $user_id, $api, $defmaxcalls, $defmaxtextlength) {
   global $keys;
+  global $keyval;
     $max_calls_per_minute = $defmaxcalls;//100;
     $access_time = 86400;//2592000; // Zeitlimit in Sekunden
     $max_text_length = $defmaxtextlength;
@@ -168,11 +169,11 @@ function check_access_limit($text, $user_id, $api, $defmaxcalls, $defmaxtextleng
         die('Text ist zu lang!');
     }
 
-    }
-
     // Zugriffszähler erhöhen und speichern
     $data['count']++;
     $data['zeichen'] += strlen($text);
+
+    }
 
     // Daten speichern
     file_put_contents($json_file, json_encode($data));
@@ -181,6 +182,7 @@ function check_access_limit($text, $user_id, $api, $defmaxcalls, $defmaxtextleng
 
 function check_access_limit_global($text) {
   global $keys;
+  global $keyval;
 //if (strlen($text) >= 200) {
 if (strlen($text) >= 200 && $keyval != $keys) {
         // Abrufen der Audio-Datei
@@ -346,8 +348,8 @@ $url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' . urlencode($tex
 } else if ($apival == 2) {
   $audio = synthesize_text($text);
 } else if ($apival == 3) {
-$url = 'http://sf.heldendesbildschirms.de:59125/api/tts?text=' . urlencode($text) . '&voice=de_DE%2Fm-ailabs_low%23angela_merkel&noiseScale=0.333&noiseW=0.333&lengthScale=1&ssml=false&audioTarget=client';
-//$url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+//$url = 'http://sf.heldendesbildschirms.de:59125/api/tts?text=' . urlencode($text) . '&voice=de_DE%2Fm-ailabs_low%23angela_merkel&noiseScale=0.333&noiseW=0.333&lengthScale=1&ssml=false&audioTarget=client';
+$url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
 
 // $opts = array(
 //     'socket' => array(
