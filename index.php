@@ -653,6 +653,22 @@ const timer = setInterval(() => {
   const messages = document.getElementsByClassName("chat")[0];
   messages.scrollTop = messages.scrollHeight;
 }
+		function getEmotes(emote_id) {
+      fetch('https://api.twitch.tv/helix/chat/emotes/set?emote_set_id=' + emote_id, {
+        headers: {
+          'Authorization': 'Bearer ' + token.substring(6),
+          'Client-ID': "4f4q2je3cxhhkqh9lp4c36qwa3dvyj"
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(JSON.stringify(data));
+          alert(JSON.stringify(data));
+          return JSON.stringify(data);
+      })
+        .catch(error => console.error(error)) ;
+    }
+
 
 		function parseMessage(message) {
 
@@ -831,6 +847,7 @@ const timer = setInterval(() => {
 
 			switch (commandParts[0]) {
 				case 'JOIN':
+
 				case 'PART':
 				case 'NOTICE':
 				case 'CLEARCHAT':
@@ -1005,6 +1022,7 @@ const timer = setInterval(() => {
 			return "";
 		}
 
+    var token = "";
 		function checkCookie(cookie_input, cookie_name) {
 
 			/*cookie_temp = getCookie(cookie_name);
@@ -1033,7 +1051,7 @@ const timer = setInterval(() => {
 
 
 			ReadNamesAsCookie()
-			var token = document.getElementById("token_input").value
+			token = document.getElementById("token_input").value
 			token = checkCookie(token, "token");
       //token = etUrlParam("token") ist zu unsicher, kann ich nicht machen.
 			document.getElementById("token_input").value = token;
@@ -1076,6 +1094,19 @@ const timer = setInterval(() => {
       //.catch(error => console.error(error)) ;
       .catch(error => alert("Hinweis ihere Seitzung scheint abgelaufen zu sein, bitte melden sie sich an.")) ;
       }
+
+      //fetch('https://api.twitch.tv/kraken/chat/:channel_name/emoticons', {
+      /*fetch('https://api.twitch.tv/helix/chat/emotes/global', {
+        headers: {
+          'Authorization': 'Bearer ' + token.substring(6),
+          'Client-ID': "4f4q2je3cxhhkqh9lp4c36qwa3dvyj"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data + data.data[0]);
+      })
+      .catch(error => console.error(error)) ;*/
 
 			var channel = document.getElementById("channel_input").value
 			channel = checkCookie(channel, "channel");
@@ -1174,14 +1205,61 @@ const timer = setInterval(() => {
 		let moveInterval = defaultMoveInterval;
 
 		const socket = 404;
-		//const parsedMessage = parseMessage(":heldendesbildschirms!heldendesbildschirms@heldendesbildschirms.tmi.twitch.tv PRIVMSG #heldendesbildschirms : Wieso habe ich immer so dumme ideen")
-		//var test = decode_utf8(parsedMessage.command.botCommandParams)
+		//const parsedMessage = parseMessage("@badge-info=subscriber/12;badges=broadcaster/1,subscriber/2,premium/1;client-nonce=a8a58f1dd79d7cc9ff2a87f976343306;color=#0000FF;display-name=HeldendesBildschirms;emote-only=1;emotes=emotesv2_50f94e2bff784399bc649e5a36abbedf:0-8,10-18/emotesv2_124c8fc37a4b43c3977acd181f46cf47:20-46/emotesv2_6260072355ed436dbdd0c4fc07c24ab3:48-59/emotesv2_456b2122c2384047a7e09a9ed695466c:61-71/emotesv2_288821f79fa146858bd4e4afb40f61cd:73-82;first-msg=0;flags=;id=791201eb-253b-421a-9aa4-fceacff8e883;mod=0;returning-chatter=0;room-id=89617799;subscriber=1;tmi-sent-ts=1685925466193;turbo=0;user-id=89617799;user-type= :heldendesbildschirms!heldendesbildschirms@heldendesbildschirms.tmi.twitch.tv PRIVMSG #heldendesbildschirms :helden9HI helden9HI helden9Heldendesbildschirms samisa13Buxe helden9Feet helden9Fun")
+    //const parsedMessage = parseMessage("@badge-info=subscriber/12;badges=broadcaster/1,subscriber/2,premium/1;client-nonce=6ab09707bb78ae33d8ada356475dd68b;color=#0000FF;display-name=HeldendesBildschirms;emotes=emotesv2_6260072355ed436dbdd0c4fc07c24ab3:9-20/emotesv2_8b18398ab3a44f3cabf971c5bb2196ff:28-39/emotesv2_124c8fc37a4b43c3977acd181f46cf47:58-84/emotesv2_d7a6a562bc18429d86496446050a966b:89-112/emotesv2_288821f79fa146858bd4e4afb40f61cd:117-126/62835:131-141/emotesv2_456b2122c2384047a7e09a9ed695466c:146-156,161-171;first-msg=0;flags=;id=7ec4ceeb-f115-40ba-9a74-5f7d10be70b4;mod=0;returning-chatter=0;room-id=89617799;subscriber=1;tmi-sent-ts=1685933627171;turbo=0;user-id=89617799;user-type= :heldendesbildschirms!heldendesbildschirms@heldendesbildschirms.tmi.twitch.tv PRIVMSG #heldendesbildschirms :scheint  samisa13Buxe   zu  samisa13Lieb   funktionieren  helden9Heldendesbildschirms    helden9Unterweaschemodel    helden9Fun    bleedPurple    helden9Feet    helden9Feet")
+
+    //var test = decode_utf8(parsedMessage.command.botCommandParams)
 		//alert(`PRIVMSG :${test}`)
 		//alert(parsedMessage.command.command)
 		//alert(parsedMessage.command.botCommand)
 		//alert(parsedMessage.command.botCommandParams)
 		//alert(parsedMessage.parameters)
 		//alert(parsedMessage.source.nick)
+		/*const emotes = parsedMessage.tags.emotes;
+		console.log(emotes)
+    var parsedMessageEmoteFilter = parsedMessage.parameters;
+
+    var emote_length = [Object.keys(emotes)][0].length
+    var emotes_name_list_temp = [emote_length];
+
+    for (var i = 0; i < emote_length; i++) {
+      var emote_id = ([Object.keys(emotes)[i]][0]);
+      //var emote_start = (emotes[Object.keys(emotes)[i]][0].startPosition);
+      //var emote_end = (emotes[Object.keys(emotes)[i]][0].endPosition);
+      var emote_start = parseInt(emotes[emote_id][0].startPosition);
+      var emote_end = parseInt(emotes[emote_id][0].endPosition)+1;
+      //console.log(getEmotes())
+
+      console.log(parsedMessageEmoteFilter.substring(emote_start,emote_end))
+      emotes_name_list_temp[i] = parsedMessageEmoteFilter.substring(emote_start,emote_end);
+      console.log(emotes_name_list_temp[i]);
+    }
+
+    for (var i = 0; i < emotes_name_list_temp.length; i++) {
+      var emote_name = emotes_name_list_temp[i];
+      var regex = new RegExp(emote_name, 'g');
+      parsedMessageEmoteFilter = parsedMessageEmoteFilter.replace(regex, '');
+    }
+
+    console.log(parsedMessageEmoteFilter);*/
+		//console.log(parsedMessage)
+    //const firstEmote = emotes[Object.keys(emotes)[0]][0];
+    /*for (const emoteKey in emotes) {
+      if (emotesData.hasOwnProperty(emoteKey)) {
+        const emoteList = emotesData[emoteKey];
+
+        // Iteriere über die Emote-Objekte in der Liste
+        for (const emote of emoteList) {
+          const startPosition = emote.startPosition;
+          const endPosition = emote.endPosition;
+
+          console.log(`Emote Key: ${emoteKey}`);
+          console.log(`Startposition: ${startPosition}`);
+          console.log(`Endposition: ${endPosition}`);
+          console.log('---');
+        }
+      }
+    }*/
 		document.addEventListener("DOMContentLoaded", () => {
 			//var msg = parsedMessage.source.nick + " schreibt: " + parsedMessage.parameters
 			//if (checkNames(parsedMessage.source.nick) == true) {
@@ -1214,7 +1292,7 @@ const timer = setInterval(() => {
 				// Verbindung zum Twitch-IRC-Server hergestellt, sende Authentifizierungsnachricht
 				socket.send(`PASS ${token}`);
 				socket.send(`NICK ${username}`);
-
+				socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
 				/*let intervalObj = setInterval(() => {
 		        connection.send(`PRIVMSG ${channel} :${moveMessage}`);
 		    }, moveInterval);*/
@@ -1292,7 +1370,31 @@ const timer = setInterval(() => {
 								}*/
               }
 							}
-              record(parsedMessage.source.nick,parsedMessage.parameters, autoreadBool, document.getElementById('slider_autoreadDelayn').value);
+
+              var parsedMessageEmoteFilter = parsedMessage.parameters;
+              var emotes = parsedMessage.tags.emotes;
+
+              var emote_length = [Object.keys(emotes)][0].length
+              var emotes_name_list_temp = [emote_length];
+
+              for (var i = 0; i < emote_length; i++) {
+                var emote_id = ([Object.keys(emotes)[i]][0]);
+                //var emote_start = (emotes[Object.keys(emotes)[i]][0].startPosition);
+                //var emote_end = (emotes[Object.keys(emotes)[i]][0].endPosition);
+                var emote_start = parseInt(emotes[emote_id][0].startPosition);
+                var emote_end = parseInt(emotes[emote_id][0].endPosition)+1;
+                //console.log(getEmotes())
+                
+                emotes_name_list_temp[i] = parsedMessageEmoteFilter.substring(emote_start,emote_end);
+              }
+
+              for (var i = 0; i < emotes_name_list_temp.length; i++) {
+                var emote_name = emotes_name_list_temp[i];
+                var regex = new RegExp(emote_name, 'g');
+                parsedMessageEmoteFilter = parsedMessageEmoteFilter.replace(regex, '');
+              }
+
+              record(parsedMessage.source.nick,parsedMessageEmoteFilter, autoreadBool, document.getElementById('slider_autoreadDelayn').value);
 
 							/*if ('papagei' === parsedMessage.command.botCommand) {
 								socket.send(`PRIVMSG ${channel} :${parsedMessage.command.botCommandParams}`);
@@ -1373,6 +1475,10 @@ const timer = setInterval(() => {
   Und ja jeder der sich anmeldet über die Seite hat jetzt für 24h 1000 Nachrichten und Maximal 1000 Zeichen zum verbrauchen, die Nachricht darf 500 Zeichen umfassen.<br>
   Und maximal 1 Nachricht die Sekunde.<br>
   Für alle anderen das normale Limit 10 Nachrichten pro Minute mit Maximal 200 Zeichen.<br>
+  Emotefilter<br>
+  Nachrichten Cache letzte 500 Namen und letzte 30 Nachrichten (Serverseitig).<br>
+  Nachrichten Limit pro User.<br>
+  Chat befehl fürs Sprechen (Optional).<br>
   <?php
   //error_log('Fehlermeldung', 0);
   ?>
