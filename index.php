@@ -189,15 +189,29 @@ xhr.send(params); </script>";*/
   <label id="sliderValue_autoreadDelayn">0</label>
   <br>
   <label for="slider_TTS">TTS wählen:</label>
-  <input type="range" id="slider_TTS" name="slider" oninput="document.getElementById('sliderValue_TTS').innerHTML = getText(document.getElementById('slider_TTS').value)" min="0" max="3" value="1">
-  <label id="sliderValue_TTS">Google Übersetzer TTS</label>
+  <input type="range" id="slider_TTS" name="slider" oninput="document.getElementById('sliderValue_TTS').innerHTML = getText(document.getElementById('slider_TTS').value)" min="0" max="3" value="0">
+  <label id="sliderValue_TTS">Browser TTS</label>
   <br>
   <label for="slider_volume">Lautstärke:</label>
   <input type="range" id="slider_volume" name="slider" oninput="document.getElementById('sliderValue_volume').innerHTML = setVolume(document.getElementById('slider_volume').value)" min="0" max="100" value="100">
   <label id="sliderValue_volume">100</label>
   <br>
   <label for="key_input" id="key_input_label" style="display:none;">Dein Zugriffscode:</label>
-  <input type="password" id="key_input" style="display:none;"><br>
+  <input type="password" id="key_input" style="display:none;">
+  <br>
+  Dieser Wert wird gesetzt, wennn Minimale Aufrufe aktiviert überschritten wurde. <br>
+  <label for="slider_min_aufrufe">Minimale Aufrufe pro Minute:</label>
+  <input type="range" id="slider_min_aufrufe" name="slider" oninput="document.getElementById('sliderValue_min_aufrufe').innerHTML = document.getElementById('slider_min_aufrufe').value;" min="1" max="60" value="60">
+  <label id="sliderValue_min_aufrufe">60</label>
+  <br>
+  <label for="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">Minimale Aufrufe aktiviert wenn diese Aufrufe erreicht sind:</label>
+  <input type="range" id="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').innerHTML = document.getElementById('slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').value;" min="1" max="60" value="60">
+  <label id="sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">60</label>
+  <br>
+  <label for="slider_max_aufrufe">Maximale Aufrufe pro Minute:</label>
+  <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
+  <label id="sliderValue_max_aufrufe">60</label>
+  <br>
 
   <label for="api_counter" id="api_counter_label" style="display:none;">Ja was weiß ich:</label>
 
@@ -280,10 +294,10 @@ xhr.send(params); </script>";*/
 		function addNamebyElement() {
 			// get input value
 			var nameInput = document.getElementById("name-input");
-			addName(nameInput.value, false, true);
+			addName(nameInput.value, false, 0, true);
 		}
 
-		function addName(newName, ban, Cookie) {
+		function addName(newName, ban, max_counts, Cookie) {
 			index = checkNames(newName)
 			if (checkNames(newName) === false) { // add new name to list
 				var nameInput = document.getElementById("name-input");
@@ -300,7 +314,7 @@ xhr.send(params); </script>";*/
 				newItemname.textContent = newName;
 				newItemname.setAttribute("href", "#");
 				newItemname.addEventListener("click", function() {
-					addName(newName, ban, true);
+					addName(newName, ban, 0, true);
 				});
 
         var newItemspace = document.createElement("label");
@@ -320,12 +334,43 @@ xhr.send(params); </script>";*/
 					Namesbann(checkNames(newNametemp));
 				});
 
+        var newItemspace2 = document.createElement("label");
+        newItemspace2.textContent = " ";
+
+        // <label for="slider_max_aufrufe">Maximale Aufrufe pro Minute:</label>
+        // <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
+        // <label id="sliderValue_max_aufrufe">60</label>
+
+        var counts = 0;
+        var newItem_counts_label = document.createElement("label");
+        newItem_counts_label.textContent = counts;
+
+        var newItem_max_counts_label = document.createElement("label");
+        newItem_max_counts_label.textContent = max_counts;
+
+        var newItem_max_counts_slider = document.createElement("input");
+        newItem_max_counts_slider.type="range"
+        newItem_max_counts_slider.name = "slider";
+        newItem_max_counts_slider.value = 0;
+        newItem_max_counts_slider.min = 0;
+        newItem_max_counts_slider.max = 60;
+        //newItem_max_counts_slider.oninput = "document.getElementById("+newItem_max_counts_label+").innerHTML = document.getElementById('"+newItem_max_counts_slider+"').value;";
+        newItem_max_counts_slider.oninput = function() {
+          newItem_max_counts_label.innerHTML = newItem_max_counts_slider.value;
+
+          //document.getElementById(newItem_max_counts_label).innerHTML = document.getElementById(newItem_max_counts_slider).value;
+        };
+
 				nameList.appendChild(newItem);
       	newItem.appendChild(newItemban);
         newItem.appendChild(newItemspace);
       	newItem.appendChild(newItemname);
+        newItem.appendChild(newItemspace2);
+        newItem.appendChild(newItem_counts_label);
+        newItem.appendChild(newItem_max_counts_slider);
+        newItem.appendChild(newItem_max_counts_label);
 
-        whitelist_names.push({name: newName, ban: ban});
+        whitelist_names.push({name: newName, ban: ban, counts: counts, max_counts: max_counts});
 
 				/*const userLink = document.createElement("a");
 				userLink.setAttribute("href", "#");
@@ -382,7 +427,7 @@ xhr.send(params); </script>";*/
     	//whitelist_names = JSON.parse(names)
       var whitelist_names_temp = JSON.parse(names)
         for (var i = 0; i < whitelist_names_temp.length; i++) {
-            addName(whitelist_names_temp[i].name, whitelist_names_temp[i].ban, false)
+            addName(whitelist_names_temp[i].name, whitelist_names_temp[i].ban, 0, false)
         }
       }
 		}
@@ -575,6 +620,64 @@ const timer = setInterval(() => {
       //audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURI(message) + '&tl=de&client=tw-ob';
       var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
       audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
+
+      //Das möchte ich vielleicht noch Hinzufügen, falls zulange keine Antwort kommt, dass dann ein anderes TSS genutzt wird.
+      /*
+      var timeoutMilliseconds = 5000; // Zeit in Millisekunden (hier 5 Sekunden)
+
+      var timeout = setTimeout(function() {
+        // Diese Funktion wird nach Ablauf des Timeouts aufgerufen
+        andereFunktion();
+      }, timeoutMilliseconds);
+
+      function andereFunktion() {
+        // Code für die andere Funktion hier einfügen
+        console.log("Timeout erreicht. Andere Funktion wird aufgerufen.");
+      }
+
+      // Beispielhafte Verwendung mit Audio-Quelle
+      var audio = new Audio();
+      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
+
+      // Wenn der Timeout abgelaufen ist, wird die andereFunktion aufgerufen
+      timeout;
+      */
+      /*
+      var timeoutMilliseconds = 5000; // Zeit in Millisekunden (hier 5 Sekunden)
+
+      var controller = new AbortController();
+      var signal = controller.signal;
+
+      var timeout = setTimeout(function() {
+        // Diese Funktion wird nach Ablauf des Timeouts aufgerufen
+        controller.abort(); // Abbruch des Requests
+        andereFunktion();
+      }, timeoutMilliseconds);
+
+      fetch('https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key, { signal })
+        .then(function(response) {
+          // Erfolgreiche Antwort verarbeiten
+          clearTimeout(timeout); // Timeout löschen, da der Request erfolgreich war
+          return response.json();
+        })
+        .then(function(data) {
+          // Daten verarbeiten
+        })
+        .catch(function(error) {
+          if (error.name === 'AbortError') {
+            // Der Request wurde abgebrochen (Timeout erreicht)
+            // Hier können Sie den entsprechenden Fehlerbehandlungscode einfügen
+          } else {
+            // Anderer Fehler trat auf
+            console.error(error);
+          }
+        });
+
+      function andereFunktion() {
+        // Code für die andere Funktion hier einfügen
+        console.log("Timeout erreicht. Andere Funktion wird aufgerufen.");
+      }
+      */
 
       audio.playbackRate = document.getElementById("slider").value;
       audio.addEventListener('canplaythrough', function() {
@@ -1043,7 +1146,12 @@ const timer = setInterval(() => {
 			//addName("heldendesbildschirms",false);
 
 			api = getCookie("sliderTTSValue");
-      document.getElementById("slider_TTS").value = api;
+      if (api !== undefined && api != "") {
+        document.getElementById("slider_TTS").value = api;
+      } else {
+        document.getElementById("slider_TTS").value = 3;
+      }
+
       document.getElementById('sliderValue_TTS').innerHTML = getText(api);
 
       key = getCookie("keyAPISValue");
@@ -1140,7 +1248,7 @@ const timer = setInterval(() => {
 			userLink.textContent = user;
 			userLink.addEventListener("click", function() {
 				// Add user to list
-				addName(user, false, true);
+				addName(user, false, 0, true);
 			});
 
 			messageLink.setAttribute("href", "#");
@@ -1345,11 +1453,39 @@ const timer = setInterval(() => {
 							//record(parsedMessage.source.nick, msg)
               //record(parsedMessage.source.nick,parsedMessage.parameters);
 
+              var parsedMessageEmoteFilter = parsedMessage.parameters;
+              var emotes = parsedMessage.tags.emotes;
+
+              if (emotes && typeof emotes === 'object') {
+                var emote_length = [Object.keys(emotes)][0].length
+                var emotes_name_list_temp = [emote_length];
+
+                for (var i = 0; i < emote_length; i++) {
+                  var emote_id = ([Object.keys(emotes)[i]][0]);
+                  //var emote_start = (emotes[Object.keys(emotes)[i]][0].startPosition);
+                  //var emote_end = (emotes[Object.keys(emotes)[i]][0].endPosition);
+                  var emote_start = parseInt(emotes[emote_id][0].startPosition);
+                  var emote_end = parseInt(emotes[emote_id][0].endPosition)+1;
+                  //console.log(getEmotes())
+
+                  emotes_name_list_temp[i] = parsedMessageEmoteFilter.substring(emote_start,emote_end).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                }
+
+                for (var i = 0; i < emotes_name_list_temp.length; i++) {
+                  var emote_name = emotes_name_list_temp[i];
+                  var regex = new RegExp(emote_name, 'g');
+                  parsedMessageEmoteFilter = parsedMessageEmoteFilter.replace(regex, '');
+                }
+              }
+
               var autoreadBool = false;
               //if ((checkNames(parsedMessage.source.nick) !== false) || ((checkNames("*") !== false) && (checkNamesbanned(checkNames(parsedMessage.source.nick)) == false)) ) {
               //if ((checkNames(parsedMessage.source.nick) !== false) && (checkNamesbanned(checkNames(parsedMessage.source.nick)) == false) || (checkNames("*") !== false) ) {
-              if ((checkNames(parsedMessage.source.nick) !== false) || (checkNames("*") !== false) ) {
-                if (checkNamesbanned(checkNames(parsedMessage.source.nick)) == false) {
+              var checkNames_Temp = checkNames(parsedMessage.source.nick);
+              var checkNames_all_Temp = checkNames("*");
+
+              if (((checkNames_Temp !== false) || (checkNames_all_Temp !== false) ) && parsedMessage.tags["emote-only"] == undefined) {
+                if (checkNamesbanned(checkNames_Temp) == false && checkNamesbanned(checkNames_all_Temp) == false) {
 								//speakMessage(msg);
               //  alter(parsedMessage.command.botCommand)
 
@@ -1370,29 +1506,6 @@ const timer = setInterval(() => {
 								}*/
               }
 							}
-
-              var parsedMessageEmoteFilter = parsedMessage.parameters;
-              var emotes = parsedMessage.tags.emotes;
-
-              var emote_length = [Object.keys(emotes)][0].length
-              var emotes_name_list_temp = [emote_length];
-
-              for (var i = 0; i < emote_length; i++) {
-                var emote_id = ([Object.keys(emotes)[i]][0]);
-                //var emote_start = (emotes[Object.keys(emotes)[i]][0].startPosition);
-                //var emote_end = (emotes[Object.keys(emotes)[i]][0].endPosition);
-                var emote_start = parseInt(emotes[emote_id][0].startPosition);
-                var emote_end = parseInt(emotes[emote_id][0].endPosition)+1;
-                //console.log(getEmotes())
-                
-                emotes_name_list_temp[i] = parsedMessageEmoteFilter.substring(emote_start,emote_end);
-              }
-
-              for (var i = 0; i < emotes_name_list_temp.length; i++) {
-                var emote_name = emotes_name_list_temp[i];
-                var regex = new RegExp(emote_name, 'g');
-                parsedMessageEmoteFilter = parsedMessageEmoteFilter.replace(regex, '');
-              }
 
               record(parsedMessage.source.nick,parsedMessageEmoteFilter, autoreadBool, document.getElementById('slider_autoreadDelayn').value);
 
