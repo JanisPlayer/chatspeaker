@@ -5,9 +5,8 @@
 ?>
 
 <?php
+//header('Access-Control-Allow-Origin: *');
 // Speichern des Tokens in der Session
-
-
 function getUserID(string $auth_token)  {
   $client_id = '4f4q2je3cxhhkqh9lp4c36qwa3dvyj';
 
@@ -42,7 +41,7 @@ function getUserID(string $auth_token)  {
 }
 
 session_set_cookie_params(86400); //Session Dauer 1 Tag
-session_cache_expire(144);
+session_cache_expire(1440);
 
 session_start();
 
@@ -154,7 +153,6 @@ xhr.send(params); </script>";*/
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 </head>
 
 <body>
@@ -189,7 +187,7 @@ xhr.send(params); </script>";*/
   <label id="sliderValue_autoreadDelayn">0</label>
   <br>
   <label for="slider_TTS">TTS wählen:</label>
-  <input type="range" id="slider_TTS" name="slider" oninput="document.getElementById('sliderValue_TTS').innerHTML = getText(document.getElementById('slider_TTS').value)" min="0" max="3" value="0">
+  <input type="range" id="slider_TTS" name="slider" oninput="document.getElementById('sliderValue_TTS').innerHTML = getText(document.getElementById('slider_TTS').value)" min="0" max="4" value="0">
   <label id="sliderValue_TTS">Browser TTS</label>
   <br>
   <label for="slider_volume">Lautstärke:</label>
@@ -198,6 +196,21 @@ xhr.send(params); </script>";*/
   <br>
   <label for="key_input" id="key_input_label" style="display:none;">Dein Zugriffscode:</label>
   <input type="password" id="key_input" style="display:none;">
+  <label for="eigenes_tts_input" id="eigenes_tts_label" style="display:none;">Deine TTS Server URL:</label>
+  <input type="password" id="eigenes_tts_input" style="display:none;">
+  <label for="eigenes_tts_show" id="eigenes_tts_show_label" style="display:none;">URL anzeigen</label>
+  <input type="checkbox" id="eigenes_tts_show" onclick="showPassword('eigenes_tts_input')">
+  <script>
+    function showPassword(eid) {
+        var passwordInput = document.getElementById(eid);
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
+    }
+  </script>
   <br>
   Dieser Wert wird gesetzt, wennn Minimale Aufrufe aktiviert überschritten wurde. <br>
   <label for="slider_min_aufrufe">Minimale Aufrufe pro Minute:</label>
@@ -211,6 +224,33 @@ xhr.send(params); </script>";*/
   <label for="slider_max_aufrufe">Maximale Aufrufe pro Minute:</label>
   <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
   <label id="sliderValue_max_aufrufe">60</label>
+  <br>
+  <label for="select_model">Select Model:</label>
+  <select class="" id="select_model" name="select_model">
+    <option value="0">de/thorsten/tacotron2-DDC</option>
+  </select>
+  <br>
+  <label for="select_format">Select Format:</label>
+  <select class="" id="select_format" name="select_format">
+    <option value="wav">wav</option>
+    <option value="aac">aac</option>
+    <option value="mp3">mp3</option>
+  </select>
+  <br>
+  <label for="select_bitrate">Select Bitrate:</label>
+  <select class="" id="select_bitrate" name="select_bitrate">
+    <option value="0">96 Kbits</option>
+    <option value="1">128 Kbits</option>
+    <option value="2">256 Kbits</option>
+    <option value="3">320 Kbits</option>
+  </select>
+  <br>
+  <label for="select_server">Force select server:</label>
+  <select class="" id="select_server" name="server">
+    <option value="false">Auto Load Balance</option>
+    <option value="1">VPS 4c AMD EPYC 7513</option>
+    <option value="2">NUC i5-8259U</option>
+  </select>
   <br>
 
   <label for="api_counter" id="api_counter_label" style="display:none;">Ja was weiß ich:</label>
@@ -243,11 +283,24 @@ xhr.send(params); </script>";*/
   function getText(sliderValue) {
     if (sliderValue == 2) {
         document.getElementById("key_input").style.display = "";
-                document.getElementById("key_input_label").style.display = "";
+        document.getElementById("key_input_label").style.display = "";
     }else {
-         document.getElementById("key_input").style.display = "none";
-                  document.getElementById("key_input_label").style.display = "none";
+        document.getElementById("key_input").style.display = "none";
+        document.getElementById("key_input_label").style.display = "none";
     }
+
+    if (sliderValue == 4) {
+        document.getElementById("eigenes_tts_input").style.display = "";
+        document.getElementById("eigenes_tts_label").style.display = "";
+        document.getElementById("eigenes_tts_show").style.display = "";
+        document.getElementById("eigenes_tts_show_label").style.display = "";
+    }else {
+        document.getElementById("eigenes_tts_input").style.display = "none";
+        document.getElementById("eigenes_tts_label").style.display = "none";
+        document.getElementById("eigenes_tts_show").style.display = "none";
+        document.getElementById("eigenes_tts_show_label").style.display = "none";
+    }
+
 		//setCookie("sliderTTSValue", sliderValue, 30);
     api = sliderValue;
 
@@ -262,6 +315,8 @@ xhr.send(params); </script>";*/
       return "Google API TTS";
       document.getElementById("api_counter_label").style.display = "";
     } else if (sliderValue == 3) {
+      return "HeldendesBildschirms TTS";
+    } else if (sliderValue == 4) {
       return "Eigenes TTS";
     }
 
@@ -539,7 +594,10 @@ xhr.send(params); </script>";*/
       audio.volume = Global_Volume / 100;
 			//audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURI(message) + '&tl=de&client=tw-ob';
       var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
-			audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
+      var convert_format = document.getElementById('select_format');
+      var convert_bitrate = document.getElementById('select_bitrate');
+      var select_server_val = document.getElementById('select_server');
+			audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&convert_format=' + convert_format + '&convert_bitrate=' + convert_bitrate + '&server=' + select_server_val + '&key=' + key;
       //var sliderValue = document.getElementById("slider").value; // Beispielwert zwischen 0 und 20
       //var floatValue = (sliderValue / 10) + 0.1; // Beispielwert zwischen 0,1 und 2,0
       //audio.playbackRate = floatValue;
@@ -703,6 +761,39 @@ const timer = setInterval(() => {
     }
     }
 
+    function speakMessageTTSbyURL(message) {
+      if (audio.paused == true) {
+      audio = new Audio();
+      audio.volume = Global_Volume / 100;
+      var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
+      var baseUrl = document.getElementById('eigenes_tts_input').value;
+      var modifiedUrl = baseUrl.replace(/text=.*?/, "text=" + message)
+      audio.src = modifiedUrl;
+
+      audio.playbackRate = document.getElementById("slider").value;
+      audio.addEventListener('canplaythrough', function() {
+        audio.play();
+      });
+
+    } else {
+      // Timer initialisieren
+const timer = setInterval(() => {
+  // Wenn das Audio pausiert ist, die Aktion ausführen
+  for (var i = 0; i < audio_stop_id.length; i++) {
+    if (audio_stop_id === "all" ) {
+      clearInterval(timer);
+    }
+  }
+  if (audio.paused) {
+    // Führen Sie hier Ihre Aktion aus
+    speakMessageSelectTTS(message)
+    // Timer beenden
+    clearInterval(timer);
+  }
+}, 1000); // Timer alle 1000 Millisekunden ausführen
+    }
+    }
+
     function speakMessageDelay(user, message, delay, id) {
       var use = false;
       var i = 0;
@@ -738,7 +829,9 @@ const timer = setInterval(() => {
         speakMessagegoogleTTS(message);
       } else if (sliderValue == 3) {
         speakMessageMyTTS(message);
-      }
+      } else if (sliderValue == 4) {
+        speakMessageTTSbyURL(message);
+    }
       update_counter();
     }
 
@@ -1491,7 +1584,7 @@ const timer = setInterval(() => {
 
               if (parsedMessage.parameters.indexOf('@') === -1 && parsedMessage.command.botCommand === undefined) {
                   //speakMessageSelectTTS(createMessage(parsedMessage.source.nick,parsedMessage.parameters));
-                  if (parsedMessage.parameters.length = document.getElementById('slider_min_zeichen').value && parsedMessage.parameters.length <= document.getElementById('slider_max_zeichen').value) {
+                  if (parsedMessage.parameters.length >= document.getElementById('slider_min_zeichen').value && parsedMessage.parameters.length <= document.getElementById('slider_max_zeichen').value) {
                      autoreadBool = true
                   }
               }
@@ -1570,28 +1663,33 @@ const timer = setInterval(() => {
       }
 		}
 	</script>
+  Tutorial: <a href="https://youtu.be/CT_BSBgXtyQ" target="_blank">https://youtu.be/CT_BSBgXtyQ</a> <br>
+  Unterstützen Sie das Projekt mit einem Pull Request oder Bug Report auf GitHub: <a href="https://github.com/JanisPlayer/chatspeaker" target="_blank">https://github.com/JanisPlayer/chatspeaker</a> <br><br>
 
-  Es ist bis jetzt noch eine Test Andwendung: <br>
-  Es fehlt - Benutzername um auch mit * alle vorlesen Nachrichten zu blockieren. <br>
-  Beim erneuten klicken auf einen Nutzer diesen - zu blockieren und nicht nur zu entferenen. <br>
-  Mod Entscheidungen berücksichtigen sollte funktionieren. <br>
-  Die bedinnung der Benutzer Oberfläche. <br>
-  Daten Exportieren über JSON oder Server. <br>
-  Ein WS oder PHP Server für die Seuerung in OBS mit dem dazugehörigen Client. <br>
-  Warnung Momentan noch ohne csrf_token, die Anfrage ist somit noch nicht vor MitM sicher, bitte achten sie darauf sich in einem sicheren Netzwerk zu befinden. <br>
-  Die Sitzung wird nun Testweise durch einen csrf_token geschützt. <br>
-  100% Sicher ist das ganze aber nicht, wei100% Sicher ist das ganze aber nicht, weil ich es gerade noch der Einfachheit in einem Cookie speichere, über eine HTTP Verbindung kann dieser gestohlen werden, akzeptieren Sie bitte bis zu einer Verbesserung keine HTTP Verbindungen zu meiner Seite. <br><br>
+  Es handelt sich bisher noch um eine Testanwendung: <br>
+  Es fehlt - Benutzername, um auch mit * alle vorherigen Nachrichten zu blockieren. <br>
+  Beim erneuten Klicken auf einen Nutzer diesen - zu blockieren und nicht nur zu entfernen. <br>
+  Mod-Entscheidungen sollten berücksichtigt werden. <br>
+  Die Bedienung der Benutzeroberfläche. <br>
+  Daten exportieren über JSON oder Server. <br>
+  Ein WS- oder PHP-Server für die Steuerung in OBS mit dem dazugehörigen Client. <br>
+  Warnung: Momentan noch ohne csrf_token; die Anfrage ist somit noch nicht vor Man-in-the-Middle-Angriffen sicher. Bitte achten Sie darauf, sich in einem sicheren Netzwerk zu befinden. <br>
+  Die Sitzung wird nun testweise durch einen csrf_token geschützt. <br>
+  100% sicher ist das Ganze jedoch nicht, weil ich es gerade noch der Einfachheit halber in einem Cookie speichere. Über eine HTTP-Verbindung kann dieser gestohlen werden. Akzeptieren Sie bitte bis zu einer Verbesserung keine HTTP-Verbindungen zu meiner Seite. <br><br>
 
+  Über das HeldendesBildschirms TTS kannst du 1000 Nachrichten und 50 TSD Zeichen pro Tag senden. Es wird jedoch empfohlen, ein eigenes TTS zu nutzen, wie im Tutorial gezeigt, da sich dies wahrscheinlich ändern wird und viel Leistung kosten kann. <br><br>
+
+  Hinweis: Das Google TTS verursacht API-Kosten, die ich mir als Hobby-Entwickler nicht leisten kann. Falls dies gewünscht ist, empfehle ich die Lösung, ein eigenes TTS zu nutzen. Hier könnt ihr bettervoice.php als Vorlage verwenden und den Regler auf "Eigenes TTS" setzen. Fügt eure URL wie im Tutorial gezeigt ein. <br>
   https://cloud.google.com/text-to-speech/pricing?hl=de<br>
-  8 USD kosten 1000 Nachrichten mit 500 Zeichen. (500 TSD Zeichen)<br>
-  Die frage ist halt was ist realistisch. :D
-  Und ja jeder der sich anmeldet über die Seite hat jetzt für 24h 1000 Nachrichten und Maximal 1000 Zeichen zum verbrauchen, die Nachricht darf 500 Zeichen umfassen.<br>
-  Und maximal 1 Nachricht die Sekunde.<br>
-  Für alle anderen das normale Limit 10 Nachrichten pro Minute mit Maximal 200 Zeichen.<br>
-  Emotefilter<br>
-  Nachrichten Cache letzte 500 Namen und letzte 30 Nachrichten (Serverseitig).<br>
-  Nachrichten Limit pro User.<br>
-  Chat befehl fürs Sprechen (Optional).<br>
+  8 USD kosten 1000 Nachrichten mit 500 Zeichen (500 TSD Zeichen).<br>
+  Die Frage ist halt, was ist realistisch. :D
+  Und ja, jeder, der sich über die Seite anmeldet, hat jetzt für 24 Stunden 1000 Nachrichten und maximal 1000 Zeichen zum Verbrauchen. Die Nachricht darf 500 Zeichen umfassen.<br>
+  Und maximal 1 Nachricht pro Sekunde.<br>
+  Für alle anderen gilt das normale Limit: 10 Nachrichten pro Minute mit maximal 200 Zeichen.<br>
+  Ein Emotefilter ist hinzugefügt, aber es braucht noch weitere Filter, die auf ausgewählte Zeichen beschränken und vielleicht Spam besser erkennen.<br>
+  Nachrichten-Cache für die letzten 500 Namen und letzten 30 Nachrichten (serverseitig).<br>
+  Nachrichtenlimit pro Benutzer.<br>
+  Chatbefehl fürs Sprechen (optional).<br>
   <?php
   //error_log('Fehlermeldung', 0);
   ?>
