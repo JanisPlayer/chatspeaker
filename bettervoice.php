@@ -349,7 +349,19 @@ $url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' . urlencode($tex
   $audio = synthesize_text($text);
 } else if ($apival == 3) {
 //$url = 'http://sf.heldendesbildschirms.de:59125/api/tts?text=' . urlencode($text) . '&voice=de_DE%2Fm-ailabs_low%23angela_merkel&noiseScale=0.333&noiseW=0.333&lengthScale=1&ssml=false&audioTarget=client';
-$url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+
+$server_select = false;
+if (isset($_GET['server']) && !empty($_GET['server']) && is_numeric(intval($_GET['server']))) {
+    $server_select = intval($_GET['server']);
+}
+$filename_server_worker_temp = '/var/www/hidden_file/1';
+if (!file_exists($filename_server_worker_temp) && $server_select !== 2 || $server_select === 1) {
+  file_put_contents($filename_server_worker_temp, null);
+//  $url = 'http://s3.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+  $url = 'http://195.90.221.83:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+} else {
+  $url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+}
 
 // $opts = array(
 //     'socket' => array(
@@ -365,6 +377,11 @@ $url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text)
 //  $audio = file_get_contents($url, false, $context); Ist super Langsam.
 
     $audio = curl($url);
+
+    if (file_exists($filename_server_worker_temp)) {
+      unlink($filename_server_worker_temp);
+    }
+
     //$audio = file_get_contents($url);
     //file_put_contents('output.wav', $audio);
      //$audio = readfile("./output.wav");
@@ -416,13 +433,13 @@ if ($apival == 1 || $apival == 2) {
   // header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
   header('Content-type: audio/mpeg');
 }
-if ($apival == 3) {
-  ob_clean();
-  // header('Cache-Control: cache');
-  // header('Cache-Control: max-age=3600, public');
-  // header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
-  header('Content-type: audio/x-wav');
-}
+// if ($apival == 3) {
+//   ob_clean();
+//   // header('Cache-Control: cache');
+//   // header('Cache-Control: max-age=3600, public');
+//   // header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
+//   header('Content-type: audio/x-wav');
+// }
 
 //header('Cache-Control: no-cache'); // Wieso macht man so etwas, die armen Daten.
 //header('Content-Transfer-Encoding: binary');
@@ -434,9 +451,88 @@ if ($apival == 3) {
 //header('Content-Disposition: inline; filename="test_audio.wav"'); // set an output file name
 
 // Ausgabe der Audio-Datei
-echo $audio;
+
+
+if (isset($_GET['convert_format'])) {
+      if ($_GET['convert_format'] === "aac" || $_GET['convert_format'] === "mp3") {
+        $convert_format = $_GET['convert_format'];
+        $convert = true;
+        if (isset($_GET['convert_bitrate']) && is_numeric($_GET['convert_bitrate'])) {
+          switch ((int)$_GET['convert_bitrate']) {
+            case 0:
+              $convert_bitrate = "96k";
+              break;
+            case 1:
+              $convert_bitrate = "128k";
+              break;
+            case 2:
+              $convert_bitrate = "192k";
+              break;
+           case 3:
+              $convert_bitrate = "320k";
+              break;
+          }
+        }
+      }
+}
+
+if ($convert == true) {
+    // Prüfe das Konvertierungsformat und Bitrate
+    $convert_format = isset($convert_format) ? $convert_format : 'mp3'; // Standardwert ist mp3
+    $convert_bitrate = isset($convert_bitrate) ? $convert_bitrate : '128k'; // Standardwert ist 128k
+
+    $hfpa = "/var/www/hidden_file/tts/audio/";
+
+    // Verzeichnisinhalt auflisten
+    $files = scandir($hfpa);
+    //check_user_id();
+    // Anzahl der Dateien im Verzeichnis ermitteln (abzüglich der Einträge "." und ".." und "/temp")
+    $file_count = count($files) - 3; //
+
+    // Generiere den Dateinamen
+    $baseFileName = "audio_" . $file_count . "";
+    $newFileName = $baseFileName;
+
+    // Überprüfe, ob die Datei bereits existiert, und finde einen neuen Dateinamen
+    while (file_exists($hfpa . $newFileName)) {
+        $file_count++; // Erhöhe den Counter
+        $newFileName = "audio_" . $file_count . ""; // Neuer Dateiname
+    }
+
+    // Abhängig vom Konvertierungsformat die entsprechende Aktion durchführen
+    file_put_contents($hfpa . "temp/" . $newFileName . ".wav", $audio);
+
+    if ($convert_format == 'aac') {
+        // Konvertiere zu AAC
+        shell_exec("ffmpeg -i " . $hfpa ."temp/" . $newFileName . ".wav" . " -b:a " . $convert_bitrate . " " . $hfpa . $newFileName . ".m4a &");
+        unlink($hfpa ."temp/" . $newFileName . ".wav");
+        ob_clean();
+        header('Content-type: audio/aac');
+        $_SESSION['Userfile_format'] = ".m4a";
+        echo file_get_contents($hfpa . $newFileName . ".m4a");
+        unlink($hfpa . $newFileName . ".m4a");
+    } elseif ($convert_format == 'mp3') {
+        // Konvertiere zu MP3
+        //shell_exec("ffmpeg -i /var/www/hidden_file/tts/audio/temp_" . $newFileName . "-b:a 128k /var/www/hidden_file/tts/audio/". $newFileName . "test &");
+        shell_exec("ffmpeg -i " . $hfpa ."temp/" . $newFileName . ".wav" . " -b:a " . $convert_bitrate . " " . $hfpa . $newFileName . ".mp3 &");
+        unlink($hfpa ."temp/" . $newFileName . ".wav");
+        ob_clean();
+        header('Content-type: audio/mp3');
+        $_SESSION['Userfile_format'] = ".mp3";
+        echo file_get_contents($hfpa . $newFileName . ".mp3");
+        unlink($hfpa . $newFileName . ".mp3");
+    }
+} else {
+    // Speichere die Audiodatei
+    ob_clean();
+    header('Content-type: audio/x-wav');
+    file_put_contents($hfp . $newFileName . ".wav", $audio);
+    $_SESSION['Userfile_format'] = ".wav";
+    echo $audio;
+}
 
 }
+
 /*if (isset($_GET['text']) && !empty($_GET['text']) && $keyval == "") {
 
     // Holen des Textes aus der GET-Anfrage
