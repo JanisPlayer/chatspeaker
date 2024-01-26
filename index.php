@@ -151,20 +151,78 @@ xhr.send(params); </script>";*/
 <head>
 	<title>Twitch-Nachrichten vorlesen</title>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="description" content="Liest Twitch Chat Automatisch oder Manuel vor mit Whitelist einfach auf die Nutzer klicken um sie hinzuzufügen oder selbst eintragen.">
+  <meta property="og:image" content="https://heldendesbildschirms.de/icon/android-icon-192x192.png" />
+  <meta name="keywords" content="twich, chat, vorlesen, lesen, speak, speaker, chatspeaker, voiceserver">
+  <meta name="author" content="Janis">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <link rel="stylesheet" href="index.css">
+  <link rel="apple-touch-icon" sizes="57x57" href="/icon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icon/apple-/icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/icon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon/favicon-16x16.png">
+  <link rel="manifest" href="/icon/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#0033CC" />
+  <style type="text/css">
+  </style>
 </head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-176121451-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag('js', new Date());
+
+  gtag('config', 'UA-176121451-1', {
+    'anonymize_ip': true
+  });
+</script>
+
+<!-- Google Tag Manager -->
+<script>
+  (function(w, d, s, l, i) {
+    w[l] = w[l] || [];
+    w[l].push({
+      'gtm.start': new Date().getTime(),
+      event: 'gtm.js'
+    });
+    var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s),
+      dl = l != 'dataLayer' ? '&l=' + l : '';
+    j.async = true;
+    j.src =
+      'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+    f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', 'GTM-K73ZCBF');
+</script>
+<!-- End Google Tag Manager -->
 
 <body>
   <h1>Twitch-Nachrichten vorlesen</h1>
 	<button onclick="window.location = 'https://id.twitch.tv/oauth2/authorize?client_id=4f4q2je3cxhhkqh9lp4c36qwa3dvyj&redirect_uri=https://heldendesbildschirms.de/chatspeaker/&response_type=code&scope=chat:read'">Twich Login</button>
   <br><br>
-	<label for="username_input">Username:</label>
-	<input type="text" id="username_input"><br>
+  <div class="dev_toggle" style="display:none;">
+  	<label for="username_input">Username:</label>
+  	<input type="text" id="username_input"><br>
 
-	<label for="token_input">Token:</label>
-	<input type="password" id="token_input"><br>
-
+  	<label for="token_input">Token:</label>
+  	<input type="password" id="token_input"><br>
+  </div>
 	<label for="channel_input">Channel:</label>
 	<input type="text" id="channel_input"><br>
 
@@ -190,16 +248,51 @@ xhr.send(params); </script>";*/
   <input type="range" id="slider_TTS" name="slider" oninput="document.getElementById('sliderValue_TTS').innerHTML = getText(document.getElementById('slider_TTS').value)" min="0" max="4" value="0">
   <label id="sliderValue_TTS">Browser TTS</label>
   <br>
+  <div id="key_input_toggle" style="display:none;">
+    <label for="key_input" id="key_input_label">Dein Zugriffscode:</label>
+    <input type="password" id="key_input">
+  </div>
+  <div id="eigenes_tts_toggle" style="display:none;">
+    <label for="eigenes_tts_input" id="eigenes_tts_label" >Deine TTS Server URL:</label>
+    <input type="password" id="eigenes_tts_input">
+    <label for="eigenes_tts_show" id="eigenes_tts_show_label">URL anzeigen</label>
+    <input type="checkbox" id="eigenes_tts_show" onclick="showPassword('eigenes_tts_input')">
+  </div>
+  <div id="heldendesbildschirms_tts_toggle" style="display:none;">
+    <label for="select_model">Select Model:</label>
+    <select class="" id="select_model" name="select_model">
+      <option value="0">de/thorsten/tacotron2-DDC</option>
+    </select>
+    <br>
+    <label for="select_format">Select Format:</label>
+    <select class="" id="select_format" name="select_format">
+      <option value="wav">wav</option>
+      <option value="aac">aac</option>
+      <option value="mp3">mp3</option>
+    </select>
+    <br>
+    <label for="select_bitrate">Select Bitrate:</label>
+    <select class="" id="select_bitrate" name="select_bitrate">
+      <option value="0">96 Kbits</option>
+      <option value="1">128 Kbits</option>
+      <option value="2">256 Kbits</option>
+      <option value="3">320 Kbits</option>
+    </select>
+    <br>
+    <label for="select_server">Force select server:</label>
+    <select class="" id="select_server" name="server">
+      <option value="false">Auto Load Balance</option>
+      <option value="1">VPS 4c AMD EPYC 7513</option>
+      <option value="2">NUC i5-8259U</option>
+    </select>
+  </div>
+  <div id="api_counter_toggle" style="display:none;">
+    <label for="api_counter" id="api_counter_label"></label>
+  </div>
   <label for="slider_volume">Lautstärke:</label>
   <input type="range" id="slider_volume" name="slider" oninput="document.getElementById('sliderValue_volume').innerHTML = setVolume(document.getElementById('slider_volume').value)" min="0" max="100" value="100">
   <label id="sliderValue_volume">100</label>
   <br>
-  <label for="key_input" id="key_input_label" style="display:none;">Dein Zugriffscode:</label>
-  <input type="password" id="key_input" style="display:none;">
-  <label for="eigenes_tts_input" id="eigenes_tts_label" style="display:none;">Deine TTS Server URL:</label>
-  <input type="password" id="eigenes_tts_input" style="display:none;">
-  <label for="eigenes_tts_show" id="eigenes_tts_show_label" style="display:none;">URL anzeigen</label>
-  <input type="checkbox" id="eigenes_tts_show" onclick="showPassword('eigenes_tts_input')">
   <script>
     function showPassword(eid) {
         var passwordInput = document.getElementById(eid);
@@ -210,51 +303,37 @@ xhr.send(params); </script>";*/
             passwordInput.type = "password";
         }
     }
+    function showdev_toggle(eid) {
+        var elements = document.getElementsByClassName(eid);
+
+        for (var i = 0; i < elements.length; i++) {
+            var element = elements[i];
+
+            if (element.style.display === "none") {
+                element.style.display = "";
+            } else {
+                element.style.display = "none";  // Anzeige umschalten zwischen "" und "none"
+            }
+        }
+    }
   </script>
-  <br>
-  Dieser Wert wird gesetzt, wennn Minimale Aufrufe aktiviert überschritten wurde. <br>
-  <label for="slider_min_aufrufe">Minimale Aufrufe pro Minute:</label>
-  <input type="range" id="slider_min_aufrufe" name="slider" oninput="document.getElementById('sliderValue_min_aufrufe').innerHTML = document.getElementById('slider_min_aufrufe').value;" min="1" max="60" value="60">
-  <label id="sliderValue_min_aufrufe">60</label>
-  <br>
-  <label for="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">Minimale Aufrufe aktiviert wenn diese Aufrufe erreicht sind:</label>
-  <input type="range" id="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').innerHTML = document.getElementById('slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').value;" min="1" max="60" value="60">
-  <label id="sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">60</label>
-  <br>
-  <label for="slider_max_aufrufe">Maximale Aufrufe pro Minute:</label>
-  <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
-  <label id="sliderValue_max_aufrufe">60</label>
-  <br>
-  <label for="select_model">Select Model:</label>
-  <select class="" id="select_model" name="select_model">
-    <option value="0">de/thorsten/tacotron2-DDC</option>
-  </select>
-  <br>
-  <label for="select_format">Select Format:</label>
-  <select class="" id="select_format" name="select_format">
-    <option value="wav">wav</option>
-    <option value="aac">aac</option>
-    <option value="mp3">mp3</option>
-  </select>
-  <br>
-  <label for="select_bitrate">Select Bitrate:</label>
-  <select class="" id="select_bitrate" name="select_bitrate">
-    <option value="0">96 Kbits</option>
-    <option value="1">128 Kbits</option>
-    <option value="2">256 Kbits</option>
-    <option value="3">320 Kbits</option>
-  </select>
-  <br>
-  <label for="select_server">Force select server:</label>
-  <select class="" id="select_server" name="server">
-    <option value="false">Auto Load Balance</option>
-    <option value="1">VPS 4c AMD EPYC 7513</option>
-    <option value="2">NUC i5-8259U</option>
-  </select>
-  <br>
-
-  <label for="api_counter" id="api_counter_label" style="display:none;">Ja was weiß ich:</label>
-
+  <div class="dev_toggle" style="display:none;">
+    <br>
+    Dieser Wert wird gesetzt, wennn Minimale Aufrufe aktiviert überschritten wurde. <br>
+    <label for="slider_min_aufrufe">Minimale Aufrufe pro Minute:</label>
+    <input type="range" id="slider_min_aufrufe" name="slider" oninput="document.getElementById('sliderValue_min_aufrufe').innerHTML = document.getElementById('slider_min_aufrufe').value;" min="1" max="60" value="60">
+    <label id="sliderValue_min_aufrufe">60</label>
+    <br>
+    <label for="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">Minimale Aufrufe aktiviert wenn diese Aufrufe erreicht sind:</label>
+    <input type="range" id="slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').innerHTML = document.getElementById('slider_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren').value;" min="1" max="60" value="60">
+    <label id="sliderValue_max_aufrufe_um_minimalte_aufrufe_zu_aktivieren">60</label>
+    <br>
+    <label for="slider_max_aufrufe">Maximale Aufrufe pro Minute:</label>
+    <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
+    <label id="sliderValue_max_aufrufe">60</label>
+  </div>
+  <label for="dev_toggle_checkbox" id="dev_toggle_label">Entwickler Optionen anzeigen</label>
+  <input type="checkbox" id="dev_toggle_checkbox" onclick="showdev_toggle('dev_toggle')">
   <br><br>
   <button id="audio_pause_button" onclick="audio.pause()">Pause</button>
   <!-- <button id="audio_stop_id_button" onclick="audio_stop_id = 'all'; setTimeout(function() {audio_stop_id = 0;}, 3000);">Alle geplanten Nachrichten abbrechen</button> -->
@@ -282,41 +361,41 @@ xhr.send(params); </script>";*/
 
   function getText(sliderValue) {
     if (sliderValue == 2) {
-        document.getElementById("key_input").style.display = "";
-        document.getElementById("key_input_label").style.display = "";
-    }else {
-        document.getElementById("key_input").style.display = "none";
-        document.getElementById("key_input_label").style.display = "none";
+        document.getElementById("key_input_toggle").style.display = "";
+    } else {
+        document.getElementById("key_input_toggle").style.display = "none";
+    }
+
+    if (sliderValue == 3) {
+        document.getElementById("heldendesbildschirms_tts_toggle").style.display = "";
+    } else {
+        document.getElementById("heldendesbildschirms_tts_toggle").style.display = "none";
     }
 
     if (sliderValue == 4) {
-        document.getElementById("eigenes_tts_input").style.display = "";
-        document.getElementById("eigenes_tts_label").style.display = "";
-        document.getElementById("eigenes_tts_show").style.display = "";
-        document.getElementById("eigenes_tts_show_label").style.display = "";
-    }else {
-        document.getElementById("eigenes_tts_input").style.display = "none";
-        document.getElementById("eigenes_tts_label").style.display = "none";
-        document.getElementById("eigenes_tts_show").style.display = "none";
-        document.getElementById("eigenes_tts_show_label").style.display = "none";
+        document.getElementById("eigenes_tts_toggle").style.display = "";
+    } else {
+        document.getElementById("eigenes_tts_toggle").style.display = "none";
     }
 
 		//setCookie("sliderTTSValue", sliderValue, 30);
     api = sliderValue;
 
     if (sliderValue == 0) {
-      document.getElementById("api_counter_label").style.display = "none";
+      document.getElementById("api_counter_toggle").style.display = "none";
       return "Browser TTS";
     } else if (sliderValue == 1) {
-      document.getElementById("api_counter_label").style.display = "";
+      document.getElementById("api_counter_toggle").style.display = "";
       return "Google Übersetzer TTS";
     } else if (sliderValue == 2) {
-      document.getElementById("api_counter_label").style.display = "";
+      document.getElementById("api_counter_toggle").style.display = "";
       return "Google API TTS";
-      document.getElementById("api_counter_label").style.display = "";
+      document.getElementById("api_counter_toggle").style.display = "";
     } else if (sliderValue == 3) {
+      document.getElementById("api_counter_toggle").style.display = "";
       return "HeldendesBildschirms TTS";
     } else if (sliderValue == 4) {
+      document.getElementById("api_counter_toggle").style.display = "none";
       return "Eigenes TTS";
     }
 
@@ -325,7 +404,8 @@ xhr.send(params); </script>";*/
     function update_counter() {
       if (api <= 3  && api >= 1) {
       var jf = new XMLHttpRequest();
-      jf.open('GET', './user_data/' + user_id + '_' +  api + '.json', false);
+      var cacheBuster = '?' + new Date().getTime(); // Eine zufällige Zeichenkette für Cache-Vermeidung
+      jf.open('GET', './user_data/' + user_id + '_' +  api + '.json' + cacheBuster, false);
       //jf.open('GET', 'https://heldendesbildschirms.de/chatspeaker/user_data/' + user_id + '_' +  api + '.json', false);
       jf.send(null)
       //console.log(jf);
@@ -415,6 +495,12 @@ xhr.send(params); </script>";*/
 
           //document.getElementById(newItem_max_counts_label).innerHTML = document.getElementById(newItem_max_counts_slider).value;
         };
+        newItem_counts_label.classList.add("dev_toggle");
+        newItem_counts_label.style.display = "none";
+        newItem_max_counts_label.classList.add("dev_toggle");
+        newItem_max_counts_label.style.display = "none";
+        newItem_max_counts_slider.classList.add("dev_toggle");
+        newItem_max_counts_slider.style.display = "none";
 
 				nameList.appendChild(newItem);
       	newItem.appendChild(newItemban);
@@ -1241,8 +1327,10 @@ const timer = setInterval(() => {
 			api = getCookie("sliderTTSValue");
       if (api !== undefined && api != "") {
         document.getElementById("slider_TTS").value = api;
+        getText(api)
       } else {
         document.getElementById("slider_TTS").value = 3;
+        getText(3)
       }
 
       document.getElementById('sliderValue_TTS').innerHTML = getText(api);
@@ -1311,7 +1399,10 @@ const timer = setInterval(() => {
 
 			var channel = document.getElementById("channel_input").value
 			channel = checkCookie(channel, "channel");
-			document.getElementById("channel_input").value = channel;
+      document.getElementById("channel_input").value = channel;
+      if (channel == "" && username != "") {
+        document.getElementById("channel_input").value = username;
+      }
 		});
 
 		/*function record(user, message) {
@@ -1666,19 +1757,28 @@ const timer = setInterval(() => {
   Tutorial: <a href="https://youtu.be/CT_BSBgXtyQ" target="_blank">https://youtu.be/CT_BSBgXtyQ</a> <br>
   Unterstützen Sie das Projekt mit einem Pull Request oder Bug Report auf GitHub: <a href="https://github.com/JanisPlayer/chatspeaker" target="_blank">https://github.com/JanisPlayer/chatspeaker</a> <br><br>
 
+  Informationen für Benutzer: <br>
   Es handelt sich bisher noch um eine Testanwendung: <br>
-  Es fehlt - Benutzername, um auch mit * alle vorherigen Nachrichten zu blockieren. <br>
-  Beim erneuten Klicken auf einen Nutzer diesen - zu blockieren und nicht nur zu entfernen. <br>
+  Mit 'Login' kannst du dich anmelden. Die Informationen für Benutzername, Token und Kanal werden automatisch ausgefüllt, können jedoch auf Wunsch geändert werden. Danach musst du dich nur noch mit 'Connect' verbinden. <br>
+  Über das HeldendesBildschirms TTS kannst du täglich 1000 Nachrichten und 50.000 Zeichen senden. Es wird jedoch empfohlen, ein eigenes TTS zu nutzen, wie im Tutorial gezeigt, da sich dies wahrscheinlich ändern wird und viel Leistung kosten kann. <br>
+  Wenn du * hinzugefügt wirst, werden dir Nachrichten von allen Nutzern vorgelesen. <br>
+  Du kannst Nutzer blockieren, indem du sie hinzufügst und auf ++ klickst, damit es sich zu einem -- ändert. <br>
   Mod-Entscheidungen sollten berücksichtigt werden. <br>
+  Mit 'Pause' kannst du eine gerade gesprochene Nachricht abbrechen. <br>
+  'Alle geplanten Nachrichten abbrechen' beendet alle Nachrichten mit Zeitverzögerung oder in der Warteschlange. <br>
+  Bei der TTS-Auswahl kannst du dein Browser-TTS (nur für Chrome) oder das HeldendesBildschirms TTS oder dein eigenes TTS nutzen. Hierbei solltest du jedoch HTTPS-Proxys für Chrome verwenden oder für Firefox HTTP nutzen, aufgrund von Google-Sicherheitsfunktionen. <br>
+  Google Übersetzer oder Google TTS dienen derzeit mehr zum Testen, da die Google TTS API nicht mehr verfügbar ist. <br><br>
+
+  Informationen für Entwickler: <br>
+  Beim erneuten Klicken auf einen Nutzer diesen - zu blockieren und nicht nur zu entfernen. <br>
   Die Bedienung der Benutzeroberfläche. <br>
   Daten exportieren über JSON oder Server. <br>
   Ein WS- oder PHP-Server für die Steuerung in OBS mit dem dazugehörigen Client. <br>
+  Dazu sollte ein WebSocket-Server noch hinzugefügt werden, der die Client-Informationen validiert. Das bedeutet, er prüft, ob eine Nachricht existiert, wie viele Zeichen verwendet werden dürfen und ob der Inhalt korrekt ist, um einen Missbrauch der API zu vermeiden. Der Server erstellt dann einfach die Nachricht mit seinen Informationen. <br>
   Warnung: Momentan noch ohne csrf_token; die Anfrage ist somit noch nicht vor Man-in-the-Middle-Angriffen sicher. Bitte achten Sie darauf, sich in einem sicheren Netzwerk zu befinden. <br>
   Die Sitzung wird nun testweise durch einen csrf_token geschützt. <br>
-  100% sicher ist das Ganze jedoch nicht, weil ich es gerade noch der Einfachheit halber in einem Cookie speichere. Über eine HTTP-Verbindung kann dieser gestohlen werden. Akzeptieren Sie bitte bis zu einer Verbesserung keine HTTP-Verbindungen zu meiner Seite. <br><br>
-
-  Über das HeldendesBildschirms TTS kannst du 1000 Nachrichten und 50 TSD Zeichen pro Tag senden. Es wird jedoch empfohlen, ein eigenes TTS zu nutzen, wie im Tutorial gezeigt, da sich dies wahrscheinlich ändern wird und viel Leistung kosten kann. <br><br>
-
+  100% sicher ist das Ganze jedoch nicht, weil ich es gerade noch der Einfachheit halber in einem Cookie speichere. Über eine HTTP-Verbindung kann dieser gestohlen werden. Akzeptieren Sie bitte bis zu einer Verbesserung keine HTTP-Verbindungen zu meiner Seite. <br>
+  Es fehlt - Benutzername, um auch mit * alle vorherigen Nachrichten zu blockieren. <br>
   Hinweis: Das Google TTS verursacht API-Kosten, die ich mir als Hobby-Entwickler nicht leisten kann. Falls dies gewünscht ist, empfehle ich die Lösung, ein eigenes TTS zu nutzen. Hier könnt ihr bettervoice.php als Vorlage verwenden und den Regler auf "Eigenes TTS" setzen. Fügt eure URL wie im Tutorial gezeigt ein. <br>
   https://cloud.google.com/text-to-speech/pricing?hl=de<br>
   8 USD kosten 1000 Nachrichten mit 500 Zeichen (500 TSD Zeichen).<br>
@@ -1694,5 +1794,4 @@ const timer = setInterval(() => {
   //error_log('Fehlermeldung', 0);
   ?>
 </body>
-
 </html>
