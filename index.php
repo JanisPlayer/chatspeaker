@@ -1371,10 +1371,16 @@ const timer = setInterval(() => {
       .then(response => response.json())
       .then(data => {
         if (typeof data.data[0].login !== 'undefined' || typeof data.data[0].id !== 'undefined') {
-        username = data.data[0].login;
-        document.getElementById("username_input").value = username;
-        user_id = data.data[0].id;
-        //console.log('Benutzername: ' + username);1
+          username = data.data[0].login;
+          document.getElementById("username_input").value = username;
+          user_id = data.data[0].id;
+          //console.log('Benutzername: ' + username);
+          var channel = document.getElementById("channel_input").value
+          channel = checkCookie(channel, "channel");
+          document.getElementById("channel_input").value = channel;
+          if (channel == "" && username != "") {
+            document.getElementById("channel_input").value = username;
+          }
         } else {
         alert("Hinweis ihere Seitzung scheint abgelaufen zu sein, bitte melden sie sich an.");
         }
@@ -1396,13 +1402,6 @@ const timer = setInterval(() => {
         console.log(data + data.data[0]);
       })
       .catch(error => console.error(error)) ;*/
-
-			var channel = document.getElementById("channel_input").value
-			channel = checkCookie(channel, "channel");
-      document.getElementById("channel_input").value = channel;
-      if (channel == "" && username != "") {
-        document.getElementById("channel_input").value = username;
-      }
 		});
 
 		/*function record(user, message) {
