@@ -147,10 +147,9 @@ xhr.send(params); </script>";*/
 ?>
 
 <html>
-
 <head>
-	<title>Twitch-Nachrichten vorlesen</title>
-	<meta charset="UTF-8">
+  <title>Twitch-Nachrichten vorlesen</title>
+  <meta charset="UTF-8">
   <meta name="description" content="Liest Twitch Chat Automatisch oder Manuel vor mit Whitelist einfach auf die Nutzer klicken um sie hinzuzufügen oder selbst eintragen.">
   <meta property="og:image" content="https://heldendesbildschirms.de/icon/android-icon-192x192.png" />
   <meta name="keywords" content="twich, chat, vorlesen, lesen, speak, speaker, chatspeaker, voiceserver">
@@ -213,6 +212,10 @@ xhr.send(params); </script>";*/
 <!-- End Google Tag Manager -->
 
 <body>
+  <div class="head">
+    <img src="/img/logo-min.svg" alt="Logo" style="width:64px;height:51px;">
+    <a href="/">Helden des Bildschirms</a>
+  </div>
   <h1>Twitch-Nachrichten vorlesen</h1>
 	<button onclick="window.location = 'https://id.twitch.tv/oauth2/authorize?client_id=4f4q2je3cxhhkqh9lp4c36qwa3dvyj&redirect_uri=https://heldendesbildschirms.de/chatspeaker/&response_type=code&scope=chat:read'">Twich Login</button>
   <br><br>
@@ -229,19 +232,19 @@ xhr.send(params); </script>";*/
 	<button id="connect_button" onclick="init()">Connect</button>
   <br><br>
   <label for="slider">Sprech Geschwindikeit:</label>
-  <input type="range" id="slider" name="slider" oninput="document.getElementById('sliderValue').innerHTML = document.getElementById('slider').value" min="0.1" max="2.0" value="1.0" step="0.1">
+  <input type="range" id="slider" name="slider" oninput="document.getElementById('sliderValue').innerHTML = document.getElementById('slider').value; setCookie('speakSpeed', document.getElementById('slider').value, 365);" min="0.1" max="2.0" value="1.0" step="0.1">
   <label id="sliderValue">1.0</label>
   <br>
   <label for="slider_min_zeichen">Minimale Zeichen:</label>
-  <input type="range" id="slider_min_zeichen" name="slider" oninput="document.getElementById('sliderValue_min_zeichen').innerHTML = document.getElementById('slider_min_zeichen').value; //Platzhaltersollteeineventsein2() " min="1" max="500" value="1">
+  <input type="range" id="slider_min_zeichen" name="slider" oninput="document.getElementById('sliderValue_min_zeichen').innerHTML = document.getElementById('slider_min_zeichen').value; setCookie('min_zeichen', document.getElementById('slider_min_zeichen').value, 365);" min="1" max="500" value="1">
   <label id="sliderValue_min_zeichen">1</label>
   <br>
   <label for="slider_max_zeichen">Miximale Zeichen:</label>
-  <input type="range" id="slider_max_zeichen" name="slider" oninput="document.getElementById('sliderValue_max_zeichen').innerHTML = document.getElementById('slider_max_zeichen').value; //Platzhaltersollteeineventsein2()" min="1" max="500" value="500">
+  <input type="range" id="slider_max_zeichen" name="slider" oninput="document.getElementById('sliderValue_max_zeichen').innerHTML = document.getElementById('slider_max_zeichen').value; setCookie('max_zeichen', document.getElementById('slider_max_zeichen').value, 365);" min="1" max="500" value="500">
   <label id="sliderValue_max_zeichen">500</label>
   <br>
   <label for="slider_autoreadDelayn">Vertögerung von Automatischen Nachrichten in Sek:</label>
-  <input type="range" id="slider_autoreadDelayn" name="slider" oninput="document.getElementById('sliderValue_autoreadDelayn').innerHTML = document.getElementById('slider_autoreadDelayn').value" min="0" max="60" value="0">
+  <input type="range" id="slider_autoreadDelayn" name="slider" oninput="setautoreadDelay()" min="0" max="60" value="0">
   <label id="sliderValue_autoreadDelayn">0</label>
   <br>
   <label for="slider_TTS">TTS wählen:</label>
@@ -319,6 +322,10 @@ xhr.send(params); </script>";*/
   </script>
   <div class="dev_toggle" style="display:none;">
     <br>
+    <label for="better_input">Input Optimieren um Aussprachefehler bei zu langen Sätzen oder bei Großbuchstaben zu vermeiden</label>
+    <input type="checkbox" id="better_input_checkbox" name="better_input" value="better_input" checked="true"> <br>
+    <label for="filter-input">Erlaubte Zeichen:</label>
+    <input type="text" id="filter-input"> <br>
     Dieser Wert wird gesetzt, wennn Minimale Aufrufe aktiviert überschritten wurde. <br>
     <label for="slider_min_aufrufe">Minimale Aufrufe pro Minute:</label>
     <input type="range" id="slider_min_aufrufe" name="slider" oninput="document.getElementById('sliderValue_min_aufrufe').innerHTML = document.getElementById('slider_min_aufrufe').value;" min="1" max="60" value="60">
@@ -341,14 +348,18 @@ xhr.send(params); </script>";*/
 	<h1>Liste von Namen die erlaubt sind</h1>
 
 	<script>
+  function setautoreadDelay() {
+    document.getElementById('sliderValue_autoreadDelayn').innerHTML = document.getElementById('slider_autoreadDelayn').value; setCookie('autoreadDelay', document.getElementById('slider_autoreadDelayn').value, 365);
+  }
 
   var Global_Volume = 100;
 
   function setVolume(volumevalue)  {
     audio.volume = volumevalue / 100;
     //return audio.volume;
-   Global_Volume = volumevalue;
-   return Global_Volume;
+    Global_Volume = volumevalue;
+    setCookie("Global_Volume", Global_Volume, 365);
+    return Global_Volume;
   }
 
   function toggle(el) {
@@ -429,6 +440,9 @@ xhr.send(params); </script>";*/
 		function addNamebyElement() {
 			// get input value
 			var nameInput = document.getElementById("name-input");
+      if (nameInput.value === "") {
+        return;
+      }
 			addName(nameInput.value, false, 0, true);
 		}
 
@@ -520,20 +534,26 @@ xhr.send(params); </script>";*/
 					addName(newName,true)
 				});
 				nameList.appendChild(userLink);*/
-
-
 				//whitelist_names.push(newItem)
 				// clear input field
 				nameInput.value = "";
 				if (Cookie == true) {
 					addNamesAsCookie(newName)
 				}
+
+        if (newName === "*") {
+          document.getElementById("read_all_checkbox").checked = true;
+        }
 			} else {
+        if (newName === "*") {
+          document.getElementById("read_all_checkbox").checked = false;
+        }
+
 				whitelist_names.splice(index, 1);
 				//alert(whitelist_names)
 				var nameList = document.getElementById("name-list");
 				nameList.removeChild(nameList.childNodes[(index)]);
-				setCookie("names", JSON.stringify(whitelist_names), 30);
+				setCookie("names", JSON.stringify(whitelist_names), 365);
 			}
 		}
 
@@ -555,7 +575,7 @@ xhr.send(params); </script>";*/
 			// das Array als JSON-Zeichenkette speichern
 			//document.cookie = "names=" + JSON.stringify(names);
 			//setCookie("names", JSON.stringify(whitelist_names), 30);
-			setCookie("names", JSON.stringify(whitelist_names), 30);
+			setCookie("names", JSON.stringify(whitelist_names), 365);
 		}
 
 		function ReadNamesAsCookie() {
@@ -642,6 +662,8 @@ xhr.send(params); </script>";*/
 
 	<input type="text" id="name-input">
 	<button onclick="addNamebyElement()">Hinzufügen & löschen</button>
+  <label for="read_all_checkbox" id="dev_toggle_label">Alle vorlesen</label>
+  <input type="checkbox" id="read_all_checkbox" onclick="readAll_toggle()">
 	<!-- <button onclick="checkNames()">Namen löschen</button> -->
 	<ul id="name-list"></ul>
 
@@ -651,6 +673,13 @@ xhr.send(params); </script>";*/
 	<!-- <button id="speak">Nachrichten vorlesen</button> -->
 
 	<script>
+    function readAll_toggle() {
+      addName("*", false, 0, true);
+      if (checkNames("*") !== false) {
+        document.getElementById("read_all_checkbox").checked = true;
+      }
+    }
+
 		// Nachrichten vorlesen
 		function speakMessage(message) {
 			const synth = window.speechSynthesis;
@@ -659,8 +688,8 @@ xhr.send(params); </script>";*/
 			synth.speak(utterance);
 		}
 
-      var audio_stop_id = [];
-      var audio = new Audio();
+    var audio_stop_id = [];
+    var audio = new Audio();
 
     //Diese Funktion fügt ein zu löschendes Element dem Array hinzu und entfernt es nach 3 Sek wieder aus dem Array.
     //Der Timer scannt jede Sekunde nach allen Elementen und überprüft ob sie die Voraussetzung zum beenden erfüllen, also ob User oder Nachricht vorhanden sind, sind diese Voraussetzungen erfüllt wird der Timer beendet und die Nachricht wird nicht vorgelesen.
@@ -679,10 +708,10 @@ xhr.send(params); </script>";*/
 			audio = new Audio();
       audio.volume = Global_Volume / 100;
 			//audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURI(message) + '&tl=de&client=tw-ob';
-      var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
-      var convert_format = document.getElementById('select_format');
-      var convert_bitrate = document.getElementById('select_bitrate');
-      var select_server_val = document.getElementById('select_server');
+      var slider_TTS = document.getElementById('slider_TTS').value
+      var convert_format = document.getElementById('select_format').value;
+      var convert_bitrate = document.getElementById('select_bitrate').value;
+      var select_server_val = document.getElementById('select_server').value;
 			audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&convert_format=' + convert_format + '&convert_bitrate=' + convert_bitrate + '&server=' + select_server_val + '&key=' + key;
       //var sliderValue = document.getElementById("slider").value; // Beispielwert zwischen 0 und 20
       //var floatValue = (sliderValue / 10) + 0.1; // Beispielwert zwischen 0,1 und 2,0
@@ -731,8 +760,11 @@ const timer = setInterval(() => {
       audio.volume = Global_Volume / 100;
       //audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURI(message) + '&tl=de&client=tw-ob';
       var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
-      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
-
+      var slider_TTS = document.getElementById('slider_TTS').value
+      var convert_format = document.getElementById('select_format').value;
+      var convert_bitrate = document.getElementById('select_bitrate').value;
+      var select_server_val = document.getElementById('select_server').value;
+      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&convert_format=' + convert_format + '&convert_bitrate=' + convert_bitrate + '&server=' + select_server_val + '&key=' + key;
       audio.playbackRate = document.getElementById("slider").value;
       audio.addEventListener('canplaythrough', function() {
         audio.play();
@@ -763,7 +795,11 @@ const timer = setInterval(() => {
       audio.volume = Global_Volume / 100;
       //audio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURI(message) + '&tl=de&client=tw-ob';
       var slider_TTS = document.getElementById('slider_TTS').value //muss später in eine global war beim ändern geschrieben werden.
-      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
+      var slider_TTS = document.getElementById('slider_TTS').value
+      var convert_format = document.getElementById('select_format').value;
+      var convert_bitrate = document.getElementById('select_bitrate').value;
+      var select_server_val = document.getElementById('select_server').value;
+      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&convert_format=' + convert_format + '&convert_bitrate=' + convert_bitrate + '&server=' + select_server_val + '&key=' + key;
 
       //Das möchte ich vielleicht noch Hinzufügen, falls zulange keine Antwort kommt, dass dann ein anderes TSS genutzt wird.
       /*
@@ -781,7 +817,7 @@ const timer = setInterval(() => {
 
       // Beispielhafte Verwendung mit Audio-Quelle
       var audio = new Audio();
-      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&key=' + key;
+      audio.src = 'https://heldendesbildschirms.de/chatspeaker/bettervoice.php?text=' + message + '&api=' + slider_TTS + '&convert_format=' + convert_format + '&convert_bitrate=' + convert_bitrate + '&server=' + select_server_val + '&key=' + key;
 
       // Wenn der Timeout abgelaufen ist, wird die andereFunktion aufgerufen
       timeout;
@@ -905,7 +941,42 @@ const timer = setInterval(() => {
       }, 1000); // Timer alle 1000 Millisekunden ausführen
     }
 
+    var zeichen_filter = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜabcdefghijklmnopqrstuvwxyzäöüß0123456789,.!?% ";
     function speakMessageSelectTTS(message) {
+      if (message == "" || message == "." || message == ",") {
+        return;
+      }
+
+      if (document.getElementById("better_input_checkbox").checked == true) {
+        message = message.replace(/[\r\n]/g, " ");
+        message = message.replace(/[„“"‚'<>–-]/g, "");
+        message = message.replace(/[&]/g, "und");
+        message = message.replace(/[:]/g, ".");
+
+        message = message.replace(new RegExp("[^" + zeichen_filter + "]", "g"), "");
+
+        var inputValue = message;
+        inputValue = inputValue.replace(/([A-ZÄÖÜ][A-ZÄÖÜ]+)/g, function(match) {
+          return match.split('').join(' ');
+        });
+        inputValue = inputValue.replace(/([^.!?]{300})/g, function(match) {
+          var sentence = match.trim();
+          if (sentence.length > 0) {
+            if (sentence.charAt(sentence.length - 1) !== '.' && sentence.charAt(sentence.length - 1) !== ',') {
+              return sentence + '.';
+            } else {
+              return sentence;
+            }
+          }
+          return match;
+        });
+        message = inputValue;
+      }
+
+      if (message.length > 537) {
+          message = message.slice(0, 536) + ".";
+      }
+
       var sliderValue = document.getElementById('slider_TTS').value
       if (sliderValue == 0) {
         speakMessage(message);
@@ -1338,12 +1409,16 @@ const timer = setInterval(() => {
       key = getCookie("keyAPISValue");
       document.getElementById("key_input").value = key;
 
-
 			ReadNamesAsCookie()
+
 			token = document.getElementById("token_input").value
 			token = checkCookie(token, "token");
       //token = etUrlParam("token") ist zu unsicher, kann ich nicht machen.
 			document.getElementById("token_input").value = token;
+
+      if (checkNames("*") !== false) {
+        document.getElementById("read_all_checkbox").checked = true;
+      }
 
       <?php
       // Send the access token to the client
@@ -1360,6 +1435,90 @@ const timer = setInterval(() => {
 			var username = document.getElementById("username_input").value
 			username = checkCookie(username, "username");
 			document.getElementById("username_input").value = username;
+
+      var username = document.getElementById("username_input").value
+			username = checkCookie(username, "username");
+			document.getElementById("username_input").value = username;
+
+      Global_Volume = checkCookie(Global_Volume,"Global_Volume");
+      document.getElementById('slider_volume').value = Global_Volume;
+      document.getElementById('slider_volume').value = Global_Volume;
+      document.getElementById('sliderValue_volume').innerHTML = setVolume(Global_Volume);
+
+      var speakSpeed = 1.0
+      speakSpeed = checkCookie(speakSpeed,"speakSpeed");
+      document.getElementById('sliderValue').innerHTML = document.getElementById('slider').value = speakSpeed;
+
+      var autoreadDelay = 0
+      autoreadDelay = checkCookie(autoreadDelay,"autoreadDelay");
+      document.getElementById('sliderValue_autoreadDelayn').innerHTML = document.getElementById('slider_autoreadDelayn').value = autoreadDelay;
+
+      var min_zeichen = 1
+      min_zeichen = checkCookie(min_zeichen,"min_zeichen");
+      document.getElementById('sliderValue_min_zeichen').innerHTML = document.getElementById('slider_min_zeichen').value = min_zeichen;
+
+      var max_zeichen = 500
+      max_zeichen = checkCookie(max_zeichen,"max_zeichen");
+      document.getElementById('sliderValue_max_zeichen').innerHTML = document.getElementById('slider_max_zeichen').value = max_zeichen;
+
+      zeichen_filter = checkCookie(zeichen_filter,"zeichen_filter");
+      document.getElementById('filter-input').value = zeichen_filter;
+
+      var filterInput = document.getElementById("filter-input");
+      filterInput.addEventListener("input", function() {
+        zeichen_filter = filterInput.value;
+        setCookie("zeichen_filter", zeichen_filter, 365)
+      });
+
+      var select_model_val = 0;
+      select_model_val = checkCookie(select_model_val,"select_model");
+      document.getElementById("select_model").value = select_model_val;
+
+      var select_model_val = document.getElementById("select_model");
+      select_model_val.addEventListener("change", function() {
+        setCookie("select_model", select_model_val.value, 365)
+      });
+
+      var select_format_val = "wav";
+      select_format_val = checkCookie(select_format_val,"select_format");
+      document.getElementById("select_format").value = select_format_val;
+
+      var select_format_val = document.getElementById("select_format");
+      select_format_val.addEventListener("change", function() {
+        setCookie("select_format", select_format_val.value, 365)
+      });
+
+      var select_bitrate_val = 0;
+      select_bitrate_val = checkCookie(select_bitrate_val,"select_bitrate");
+      document.getElementById("select_bitrate").value = select_bitrate_val;
+
+      var select_bitrate_val = document.getElementById("select_bitrate");
+      select_bitrate_val.addEventListener("change", function() {
+        setCookie("select_bitrate", select_bitrate_val.value, 365)
+      });
+
+      var select_server_val = false;
+      select_server_val = checkCookie(select_server_val,"select_server");
+      if (select_server_val === "false") {
+        select_server_val = false;
+      }
+      document.getElementById("select_server").value = select_server_val;
+
+      var select_server_val = document.getElementById("select_server");
+      select_server_val.addEventListener("change", function() {
+        setCookie("select_server", select_server_val.value, 365)
+      });
+
+      var input_filter_on_off = "true";
+      input_filter_on_off = checkCookie(input_filter_on_off,"input_filter_on_off");
+      input_filter_on_off = input_filter_on_off === "true";
+      document.getElementById("better_input_checkbox").checked = input_filter_on_off;
+
+      var filterInput = document.getElementById("better_input_checkbox");
+      filterInput.addEventListener("change", function() {
+        input_filter_on_off = filterInput.checked;
+        setCookie("input_filter_on_off", input_filter_on_off, 365)
+      });
 
       if (token != "") {
       fetch('https://api.twitch.tv/helix/users', {
@@ -1568,12 +1727,12 @@ const timer = setInterval(() => {
 
 			var key = document.getElementById('key_input').value
       if (key != "") {
-          setCookie("keyAPISValue", key, 30);
+          setCookie("keyAPISValue", key, 365);
       }
-      setCookie("sliderTTSValue", api, 30);
-			setCookie("username", username, 30);
-			setCookie("channel", channel, 30);
-			setCookie("token", token, 30);
+      setCookie("sliderTTSValue", api, 365);
+			setCookie("username", username, 365);
+			setCookie("channel", channel, 365);
+			setCookie("token", token, 365);
 
 			const socket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
 
@@ -1638,7 +1797,6 @@ const timer = setInterval(() => {
 
               var parsedMessageEmoteFilter = parsedMessage.parameters;
               var emotes = parsedMessage.tags.emotes;
-
               if (emotes && typeof emotes === 'object') {
                 var emote_length = [Object.keys(emotes)][0].length
                 var emotes_name_list_temp = [emote_length];
@@ -1689,7 +1847,6 @@ const timer = setInterval(() => {
 								}*/
               }
 							}
-
               record(parsedMessage.source.nick,parsedMessageEmoteFilter, autoreadBool, document.getElementById('slider_autoreadDelayn').value);
 
 							/*if ('papagei' === parsedMessage.command.botCommand) {
@@ -1780,9 +1937,9 @@ const timer = setInterval(() => {
   Es fehlt - Benutzername, um auch mit * alle vorherigen Nachrichten zu blockieren. <br>
   Hinweis: Das Google TTS verursacht API-Kosten, die ich mir als Hobby-Entwickler nicht leisten kann. Falls dies gewünscht ist, empfehle ich die Lösung, ein eigenes TTS zu nutzen. Hier könnt ihr bettervoice.php als Vorlage verwenden und den Regler auf "Eigenes TTS" setzen. Fügt eure URL wie im Tutorial gezeigt ein. <br>
   https://cloud.google.com/text-to-speech/pricing?hl=de<br>
-  8 USD kosten 1000 Nachrichten mit 500 Zeichen (500 TSD Zeichen).<br>
+  8 USD kosten 1000 Nachrichten mit 537 Zeichen (500 TSD Zeichen).<br>
   Die Frage ist halt, was ist realistisch. :D
-  Und ja, jeder, der sich über die Seite anmeldet, hat jetzt für 24 Stunden 1000 Nachrichten und maximal 1000 Zeichen zum Verbrauchen. Die Nachricht darf 500 Zeichen umfassen.<br>
+  Und ja, jeder, der sich über die Seite anmeldet, hat jetzt für 24 Stunden 1000 Nachrichten und maximal 1000 Zeichen zum Verbrauchen. Die Nachricht darf 500 + 25 Zeichen für Namen + 12 notwendige Zeichen umfassen.<br>
   Und maximal 1 Nachricht pro Sekunde.<br>
   Für alle anderen gilt das normale Limit: 10 Nachrichten pro Minute mit maximal 200 Zeichen.<br>
   Ein Emotefilter ist hinzugefügt, aber es braucht noch weitere Filter, die auf ausgewählte Zeichen beschränken und vielleicht Spam besser erkennen.<br>
@@ -1793,4 +1950,15 @@ const timer = setInterval(() => {
   //error_log('Fehlermeldung', 0);
   ?>
 </body>
+<footer>
+  <text>
+    <ul>
+      <!-- <li>&copy; 2019 Helden des Bildschirms</li> -->
+      <li><a href="mailto:support@heldendesbildschirms.de">Kontakt</a></li>
+      <li><a href="datenschutz.html">Datenschutz</a></li>
+      <li><a href="impressum.html">Impressum</a></li>
+    </ul>
+  </text>
+</footer>
+
 </html>
