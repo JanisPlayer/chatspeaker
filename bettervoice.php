@@ -155,7 +155,7 @@ function check_access_limit($text, $user_id, $api, $defmaxcalls, $defmaxtextleng
     }
 
 
-    if (strlen($text) >= 500) {
+    if (strlen($text) >= 537) {
             // Abrufen der Audio-Datei
             $audio = file_get_contents("./bettervoiceText.mp3");
 
