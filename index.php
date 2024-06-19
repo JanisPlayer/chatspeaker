@@ -392,6 +392,8 @@ xhr.send(params); </script>";*/
 		//setCookie("sliderTTSValue", sliderValue, 30);
     api = sliderValue;
 
+    setCookie("sliderTTSValue", api, 365);
+
     if (sliderValue == 0) {
       document.getElementById("api_counter_toggle").style.display = "none";
       return "Browser TTS";
@@ -409,7 +411,6 @@ xhr.send(params); </script>";*/
       document.getElementById("api_counter_toggle").style.display = "none";
       return "Eigenes TTS";
     }
-
   }
 
     function update_counter() {
@@ -866,22 +867,22 @@ const timer = setInterval(() => {
 
     } else {
       // Timer initialisieren
-const timer = setInterval(() => {
-  // Wenn das Audio pausiert ist, die Aktion ausführen
-  for (var i = 0; i < audio_stop_id.length; i++) {
-    if (audio_stop_id === "all" ) {
-      clearInterval(timer);
+      const timer = setInterval(() => {
+        // Wenn das Audio pausiert ist, die Aktion ausführen
+        for (var i = 0; i < audio_stop_id.length; i++) {
+          if (audio_stop_id === "all" ) {
+            clearInterval(timer);
+          }
+        }
+        if (audio.paused) {
+          // Führen Sie hier Ihre Aktion aus
+          speakMessageSelectTTS(message)
+          // Timer beenden
+          clearInterval(timer);
+        }
+      }, 1000); // Timer alle 1000 Millisekunden ausführen
     }
-  }
-  if (audio.paused) {
-    // Führen Sie hier Ihre Aktion aus
-    speakMessageSelectTTS(message)
-    // Timer beenden
-    clearInterval(timer);
-  }
-}, 1000); // Timer alle 1000 Millisekunden ausführen
-    }
-    }
+   }
 
     function speakMessageTTSbyURL(message) {
       if (audio.paused == true) {
@@ -1296,27 +1297,27 @@ const timer = setInterval(() => {
 			}
 		}
 		/*function parseSource(source) {
-  if (null === source) {
-    return null;
-  }
+      if (null === source) {
+        return null;
+      }
 
-  let nick = null;
-  let host = null;
-  let idx = source.indexOf('!');
+      let nick = null;
+      let host = null;
+      let idx = source.indexOf('!');
 
-  if (-1 != idx) { // The IRC message includes a nickname.
-    nick = source.slice(0, idx);
-    idx += 1;
-    host = source.slice(idx);
-  } else {
-    nick = source;
-  }
+      if (-1 != idx) { // The IRC message includes a nickname.
+        nick = source.slice(0, idx);
+        idx += 1;
+        host = source.slice(idx);
+      } else {
+        nick = source;
+      }
 
-  return {
-    nick: nick,
-    host: host
-  };
-}*/
+      return {
+        nick: nick,
+        host: host
+      };
+    }*/
 
 		// Parsing the IRC parameters component if it contains a command (e.g., !dice).
 
@@ -1409,6 +1410,8 @@ const timer = setInterval(() => {
       key = getCookie("keyAPISValue");
       document.getElementById("key_input").value = key;
 
+      document.getElementById("eigenes_tts_input").value = getCookie("eigenes_tts_url");
+
 			ReadNamesAsCookie()
 
 			token = document.getElementById("token_input").value
@@ -1463,6 +1466,16 @@ const timer = setInterval(() => {
 
       zeichen_filter = checkCookie(zeichen_filter,"zeichen_filter");
       document.getElementById('filter-input').value = zeichen_filter;
+
+      var eigenesttsinput = document.getElementById("eigenes_tts_input");
+      eigenesttsinput.addEventListener("input", function() {
+        setCookie("eigenes_tts_url", eigenesttsinput.value, 365);
+      });
+
+      var keyinput = document.getElementById('key_input');
+      keyinput.addEventListener("input", function() {
+        setCookie("keyAPISValue", keyinput.value, 365);
+      });
 
       var filterInput = document.getElementById("filter-input");
       filterInput.addEventListener("input", function() {
@@ -1946,6 +1959,8 @@ const timer = setInterval(() => {
   Nachrichten-Cache für die letzten 500 Namen und letzten 30 Nachrichten (serverseitig).<br>
   Nachrichtenlimit pro Benutzer.<br>
   Chatbefehl fürs Sprechen (optional).<br>
+  Das Mikrofon verwenden, um herauszufinden, ob eine Person spricht.
+  Anstatt nur zu fragen, ob das Audio gerade nicht abgespielt wird, die Nachricht in die Warteschlange hinzufügen, wenn es abgespielt wird.
   <?php
   //error_log('Fehlermeldung', 0);
   ?>
