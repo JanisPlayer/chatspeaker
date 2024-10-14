@@ -1,4 +1,6 @@
 <?php
+session_start();
+ob_start();
 error_reporting(0);
 ?>
 
@@ -10,8 +12,6 @@ error_reporting(0);
 
 <?php
 $keys = "";
-
-session_start();
 
 //Ohne Witz da kannst fast wieder eine Funktion für bauen, nur weil das scheiß Teil Fehler nicht mag.
 $keyval = null;
