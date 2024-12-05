@@ -83,8 +83,16 @@ $client_secret = 'secret';
 $redirect_uri = 'https://heldendesbildschirms.de/chatspeaker/';
 
 //$authorization_code = $_GET['code'];
-$authorization_code = filter_input(INPUT_GET, 'code', FILTER_SANITIZE_STRING);
+$input_authorization_code = filter_input(INPUT_GET, 'code', FILTER_SANITIZE_STRING);
+$filtered_authorization_code = preg_replace('/[^a-z0-9]/', '', $input_authorization_code);
 
+if (strlen($filtered_authorization_code) === 30) {
+    $authorization_code = $filtered_authorization_code;
+} else {
+    die("Ungültiger Code");
+}
+
+// Here, a limit and an anti-bot check should be added (e.g., CAPTCHA or similar logic).
 $url = "https://id.twitch.tv/oauth2/token"
     . "?client_id={$client_id}"
     . "&client_secret={$client_secret}"
