@@ -1,3 +1,12 @@
+<?php
+session_set_cookie_params(86400); //Session Dauer 1 Tag
+session_cache_expire(1440);
+
+session_start();
+ob_start();
+error_reporting(0);
+?>
+
 <!DOCTYPE html>
 <?php
 //error_reporting(E_ALL);
@@ -39,11 +48,6 @@ function getUserID(string $auth_token)  {
       die('Error: Failed to retrieve user ID.');
   }
 }
-
-session_set_cookie_params(86400); //Session Dauer 1 Tag
-session_cache_expire(1440);
-
-session_start();
 
 //if (!isset($_SESSION['csrf_token'])) {
 if (!isset($_SESSION['csrf_token']) && empty($_SESSION['csrf_token']) || empty($_COOKIE['csrf_token'])) {
@@ -285,8 +289,11 @@ xhr.send(params); </script>";*/
     <label for="select_server">Force select server:</label>
     <select class="" id="select_server" name="server">
       <option value="false">Auto Load Balance</option>
-      <option value="1">VPS 4c AMD EPYC 7513</option>
-      <option value="2">NUC i5-8259U</option>
+      <option value="1">VPS 4c Intel Xeon E5-2680 v4 (Verwendbar bis 28.11.2025)</option>
+      <option value="2">i7-4790 (Übergang - möglicherweise Verfügbar)</option>
+      <option value="3">VPS dediziert 2c AMD EPYC (Verwendbar bis 28.2.2025)</option>
+      <option value="4">VPS 4c AMD EPYC 7513 (Verwendbar bis 04.11.2024)</option>
+      <option value="5">NUC i5-8259U (Nicht verwendbar - Kaputt)</option>
     </select>
   </div>
   <div id="api_counter_toggle" style="display:none;">
@@ -1515,6 +1522,7 @@ const timer = setInterval(() => {
       if (select_server_val === "false") {
         select_server_val = false;
       }
+      //select_server_val = 2;
       document.getElementById("select_server").value = select_server_val;
 
       var select_server_val = document.getElementById("select_server");
