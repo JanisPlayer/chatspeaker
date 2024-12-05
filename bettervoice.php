@@ -350,18 +350,86 @@ $url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' . urlencode($tex
 } else if ($apival == 3) {
 //$url = 'http://sf.heldendesbildschirms.de:59125/api/tts?text=' . urlencode($text) . '&voice=de_DE%2Fm-ailabs_low%23angela_merkel&noiseScale=0.333&noiseW=0.333&lengthScale=1&ssml=false&audioTarget=client';
 
-$server_select = false;
+//$server_select = false;
 if (isset($_GET['server']) && !empty($_GET['server']) && is_numeric(intval($_GET['server']))) {
     $server_select = intval($_GET['server']);
+} else {
+    $server_select = false; // Automatische Auswahl, wenn kein Server manuell ausgewählt wurde
 }
+
+$servers = [
+    3 => 'http://s4.heldendesbildschirms.de:5002/api/tts',
+    1 => 'http://s3.heldendesbildschirms.de:5002/api/tts',
+    2 => 'http://sf.heldendesbildschirms.de:5002/api/tts',
+];
+$lock_file_path = '/var/www/hidden_file/'; // Ordner für Lock-Dateien
+
+// Funktion zum Überprüfen, ob ein Server belegt ist
+function is_server_busy($server_id, $lock_file_path) {
+    $lock_file = $lock_file_path . "server_$server_id.lock";
+    return file_exists($lock_file);
+}
+
+// Funktion zum Setzen des Server-Status (belegt)
+function lock_server($server_id, $lock_file_path) {
+    $lock_file = $lock_file_path . "server_$server_id.lock";
+    touch($lock_file);
+}
+
+// Funktion zum Freigeben des Servers
+function unlock_server($server_id, $lock_file_path) {
+    $lock_file = $lock_file_path . "server_$server_id.lock";
+
+    // Entferne die Lock-Datei des aktuellen Servers
+    if (file_exists($lock_file)) {
+        unlink($lock_file);
+    }
+
+    // Prüfe und bereinige alte Lock-Dateien
+    foreach (glob($lock_file_path . "server_*.lock") as $file) {
+        if (time() - filemtime($file) > 600) { // 600 Sekunden = 10 Minuten
+            unlink($file); // Entferne alte Datei
+        }
+    }
+}
+
+// Server-Auswahl
+if ($server_select && isset($servers[$server_select])) {
+    // Manuelle Auswahl: Prüfen, ob der gewählte Server frei ist
+    if (!is_server_busy($server_select, $lock_file_path)) {
+        $url = $servers[$server_select] . '?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+        lock_server($server_select, $lock_file_path);
+    } else {
+        die("Der gewählte Server $server_select ist belegt.");
+    }
+} else {
+    // Automatische Auswahl: Finde den ersten freien Server
+	$last_key = array_key_last($servers); // Ermittle den letzten Server-Key
+	foreach ($servers as $key => $server_url) {
+	    if (!is_server_busy($key, $lock_file_path)) {
+		$url = $server_url . '?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+		lock_server($key, $lock_file_path);
+		$server_select = $key; // Speichere den genutzten Server
+		break;
+	    }
+
+	    // Wenn der aktuelle Server der letzte ist und busy ist, keine Server verfügbar
+	    if ($key === $last_key && is_server_busy($key, $lock_file_path)) {
+		die('Keine verfügbaren Server.');
+	    }
+	}
+}
+
+/*
 $filename_server_worker_temp = '/var/www/hidden_file/1';
 if (!file_exists($filename_server_worker_temp) && $server_select !== 2 || $server_select === 1) {
   file_put_contents($filename_server_worker_temp, null);
-//  $url = 'http://s3.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
-  $url = 'http://195.90.221.83:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+  $url = 'http://s3.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
+//  $url = 'http://195.90.221.83:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
 } else {
   $url = 'http://sf.heldendesbildschirms.de:5002/api/tts?text=' . urlencode($text) . '&speaker_id=&style_wav=&language_id=';
 }
+*/
 
 // $opts = array(
 //     'socket' => array(
@@ -378,9 +446,12 @@ if (!file_exists($filename_server_worker_temp) && $server_select !== 2 || $serve
 
     $audio = curl($url);
 
+    unlock_server($server_select, $lock_file_path);
+    /*
     if (file_exists($filename_server_worker_temp)) {
       unlink($filename_server_worker_temp);
     }
+    */
 
     //$audio = file_get_contents($url);
     //file_put_contents('output.wav', $audio);
