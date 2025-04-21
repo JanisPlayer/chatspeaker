@@ -81,7 +81,6 @@ if (isset($_GET['code']) && !empty($_GET['code']) && $_SESSION['csrf_token'] == 
 $client_id = '4f4q2je3cxhhkqh9lp4c36qwa3dvyj';
 $client_secret = 'secret';
 $redirect_uri = 'https://heldendesbildschirms.de/chatspeaker/';
-
 //$authorization_code = $_GET['code'];
 $input_authorization_code = filter_input(INPUT_GET, 'code', FILTER_SANITIZE_STRING);
 $filtered_authorization_code = preg_replace('/[^a-z0-9]/', '', $input_authorization_code);
@@ -299,7 +298,7 @@ xhr.send(params); </script>";*/
       <option value="false">Auto Load Balance</option>
       <option value="1">VPS 4c Intel Xeon E5-2680 v4 (Verwendbar bis 28.11.2025)</option>
       <option value="2">i7-4790 (Übergang - möglicherweise Verfügbar)</option>
-      <option value="3">VPS dediziert 2c AMD EPYC (Verwendbar bis 28.2.2025)</option>
+      <option value="3">VPS 3c AMD EPYC (Verwendbar bis 28.2.2025)</option>
       <option value="4">VPS 4c AMD EPYC 7513 (Verwendbar bis 04.11.2024)</option>
       <option value="5">NUC i5-8259U (Nicht verwendbar - Kaputt)</option>
     </select>
@@ -354,6 +353,9 @@ xhr.send(params); </script>";*/
     <input type="range" id="slider_max_aufrufe" name="slider" oninput="document.getElementById('sliderValue_max_aufrufe').innerHTML = document.getElementById('slider_max_aufrufe').value;" min="1" max="60" value="60">
     <label id="sliderValue_max_aufrufe">60</label>
   </div>
+  <label for="writeInfo_checkbox" id="writeInfo_label">Erwähnen wer zuletzt geschrieben hat.</label>
+  <input type="checkbox" id="writeInfo_checkbox" onclick="writeInfoToggle()">
+  <br>
   <label for="dev_toggle_checkbox" id="dev_toggle_label">Entwickler Optionen anzeigen</label>
   <input type="checkbox" id="dev_toggle_checkbox" onclick="showdev_toggle('dev_toggle')">
   <br><br>
@@ -384,6 +386,12 @@ xhr.send(params); </script>";*/
 
   var api = 0;
   var key = "";
+  var writeInfo = true;
+
+  function writeInfoToggle() {
+    writeInfo = document.getElementById("writeInfo_checkbox").checked
+    setCookie("writeInfo", writeInfo, 365);
+  }
 
   function getText(sliderValue) {
     if (sliderValue == 2) {
@@ -1010,7 +1018,7 @@ const timer = setInterval(() => {
 
 		var lastUser = "";
     function createMessage(user, message) {
-          if (lastUser != user) {
+          if ((lastUser != user) && (writeInfo == true)) {
                 lastUser = user;
             return (user + " schreibt: " +  message);
           } else {
@@ -1460,7 +1468,6 @@ const timer = setInterval(() => {
 
       Global_Volume = checkCookie(Global_Volume,"Global_Volume");
       document.getElementById('slider_volume').value = Global_Volume;
-      document.getElementById('slider_volume').value = Global_Volume;
       document.getElementById('sliderValue_volume').innerHTML = setVolume(Global_Volume);
 
       var speakSpeed = 1.0
@@ -1481,6 +1488,10 @@ const timer = setInterval(() => {
 
       zeichen_filter = checkCookie(zeichen_filter,"zeichen_filter");
       document.getElementById('filter-input').value = zeichen_filter;
+
+      writeInfo = checkCookie(writeInfo,"writeInfo");
+      writeInfo = (writeInfo === "true" || writeInfo === true);
+      document.getElementById("writeInfo_checkbox").checked = writeInfo;
 
       var eigenesttsinput = document.getElementById("eigenes_tts_input");
       eigenesttsinput.addEventListener("input", function() {
