@@ -1969,7 +1969,20 @@ const timer = setInterval(() => {
   Beim erneuten Klicken auf einen Nutzer diesen - zu blockieren und nicht nur zu entfernen. <br>
   Die Bedienung der Benutzeroberfläche. <br>
   Daten exportieren über JSON oder Server. <br>
-  Ein WS- oder PHP-Server für die Steuerung in OBS mit dem dazugehörigen Client. <br>
+  Ein WS- oder PHP-Server für die Steuerung in OBS mit dem dazugehörigen Client.<br>
+  Über eine PHP-Lösung mit Long Polling wäre eine getData.php nötig oder eine Integration in die bettervoice.php?getData&UserID&AudioToken&getFile.<br>
+  Es muss in dem Fall die user_data in ein nicht zugängliches Verzeichnis verschoben werden, damit weiterhin Statistiken genutzt abgerufen werden können. Wäre auch hier eine API nötig: bettervoice.php?getData&stats.<br>
+  Damit ein anderer Client wie ein Mod die Kontrolle über das, was als Audio generiert wird, übernehmen kann, ist ein weiterer ModToken nötig und eine Überarbeitung der bisherigen index.php.<br>
+  Veränderungen wären ein Mod-Modus und eine Eingabe für den Schlüssel, sodass für den Nutzer Audio-Dateien generiert werden können. Eine Möglichkeit, Nachrichten von Chattern zu bearbeiten, wäre hier dann auch sinnvoll, da ein Mod mehr Zeit als ein Streamer hat.<br>
+  Damit OBS auch noch die Nachrichten abspielt, muss beim Aufruf von getData jede Sekunde geprüft werden, ob für den Nutzer eine neue Audio im Ordner user_data/audio/UserID_AudioID.* liegt, vielleicht auch mit Index-Datei, um Nachrichten besser zu identifizieren bei Abbrüchen.<br>
+  Was die Identifikation betrifft, wäre das nötig entweder über eine ID, die vom Server generiert wird beim Erstellen einer Audio und an den Client zurückgegeben wird, oder ineffizient eine JSON, die Text und Audio-ID enthält – wäre leichter auf mehreren Clients.<br>
+  Nachteil bei dieser Lösung: OBS ist nicht autonom, weil es nur die Datei anfordert und abspielt, aber das wäre bei dem, was als Steuerung für die Moderation nötig ist, sowieso immer mit einem Browser-Tab verbunden.<br>
+  Was die Limits angeht, müsste man das Sekundenlimit für Audios in eine Warteschlange umwandeln, damit nicht bei zu vielen generierten Nachrichten nur eine Audio mit einer Fehlermeldung erstellt wird.<br>
+  Das System in der index.php kann dann auch langsam an getData angepasst werden. Das hat Vorteile, da so keine Abspielwarteschlange mehr nötig ist wie vorher. Allerdings muss das ganze System für Nachrichten-Stoppen überarbeitet werden.<br>
+  Der Mod müsste mit dieser Lösung noch mit seinem eigenen Account die Nachrichten empfangen, also sich anmelden. Vom Server wird weiterhin nicht kontrolliert, ob eine Nachricht legitim ist, dafür können Nachrichten aber auch vollständig bearbeitet werden, um Rechtschreibung zu korrigieren.<br>
+  Das wäre bei einem serverseitigen Abgleich nur prozentual möglich, um Missbrauch der API zu verhindern. Da der Dienst aber aktuell sowieso von den Nutzern auch ein eigenes TTS erfordert, ist das aktuell nicht relevant.<br>
+  Eine Umstellung auf NodeJS mit SW wäre ab mehr Nutzern sinnvoll, wenn PHP an seine Grenzen stößt und es auch sicherer vor DoS-Angriffen gemacht werden muss.<br>
+  Eine Möglichkeit, um Token zu widerrufen, muss natürlich auch in der GUI geschaffen werden. Die Token stehen dann sicher in der hiddenfile/user_data/user_data.json.<br>
   Dazu sollte ein WebSocket-Server noch hinzugefügt werden, der die Client-Informationen validiert. Das bedeutet, er prüft, ob eine Nachricht existiert, wie viele Zeichen verwendet werden dürfen und ob der Inhalt korrekt ist, um einen Missbrauch der API zu vermeiden. Der Server erstellt dann einfach die Nachricht mit seinen Informationen. <br>
   Warnung: Momentan noch ohne csrf_token; die Anfrage ist somit noch nicht vor Man-in-the-Middle-Angriffen sicher. Bitte achten Sie darauf, sich in einem sicheren Netzwerk zu befinden. <br>
   Die Sitzung wird nun testweise durch einen csrf_token geschützt. <br>
